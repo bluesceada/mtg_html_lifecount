@@ -1,99 +1,67 @@
-<!-- <meta name="viewport" content="user-scalable=no" /> -->
 <html lang="en">
-
 <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116299795-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'UA-116299795-1');
-    </script>
-
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=no" />
     <title>MTG Life Counter</title>
-    <!-- <link href="style.css" rel="stylesheet" type="text/css">-->
 <style>
-    /*disable auto zooming on typing in input field*/
-@media screen and (-webkit-min-device-pixel-ratio:0) { 
-  select:focus,
-  textarea:focus,
-  input:focus {
-    font-size: 16px;
-    background: #eee;
-  }
-}
-
-input {
-    font-size: 20em;
-}
-html,
-body,
-table {
+html, body {
     width: 100%;
     height: 100%;
     margin: 0px;
+    overflow: hidden;
     font-family: sans-serif;
-    font-size: 50px;
+    font-size: 16px;
     background: black;
     color: white;
 }
 
-table {
-    border-collapse: collapse;
+#allPlayers {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    bottom: 50px; /* Leaves exact room for HUD */
+    overflow: hidden;
+}
+
+/* Absolute grid cell positioning that bypasses table height bugs */
+.grid-cell {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 2px;
+    overflow: hidden;
 }
 
 .player {
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
     width: 100%;
     height: 100%;
-    margin: auto;
     text-align: center;
-    background: linear-gradient( 135deg, #232323, #232323, #336600, #E13C1E, #0066cc, #dce0bb, #dce0bb);
+    background: #232323;
+    display: table;
+    box-sizing: border-box;
 }
 
 .texture {
+    display: table-cell;
+    vertical-align: middle;
     height: 100%;
-    background-image: url("../images/mottled_BG_1.png");
-    background-repeat: no-repeat;
-    background-position: center center;
 }
 
 .box {
-    margin: auto;
-    padding-top: 20px;
-    padding-bottom: 9px;
-    position: relative;
-    top: 50%;
-    width: 95%;
-    -webkit-transform: translatey(-50%);
-    -moz-transform: translatey(-50%);
-    -ms-transform: translatey(-50%);
-    -o-transform: translatey(-50%);
-    transform: translatey(-50%);
+    margin: 0 auto;
+    padding: 4px;
+    width: 98%;
     background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 20px;
-}
-
-@media (max-width: 580px) {
-    .box {
-        width: 100%;
-    }
+    border-radius: 10px;
 }
 
 .playerName {
-    width: 90%;
+    width: 85%;
     text-align: center;
-    margin-top: 15px;
-    border-radius: 10px;
-    font-size: 40px;
-    border: 2px #DDDDDD solid;
+    margin-top: 2px;
+    border-radius: 5px;
+    font-size: 16px;
+    border: 1px #DDDDDD solid;
     background: #DDDDDD;
 }
 
@@ -106,134 +74,93 @@ table {
     color: white;
     display: block;
     margin: auto;
-    font-size: 200%;
+    font-size: 180%;
 }
 
 button {
-    border-radius: 5px;
-    border: 2px solid #DDDDDD;
+    border-radius: 3px;
+    border: 1px solid #DDDDDD;
     background: #DDDDDD;
-    margin-bottom: 5px;
-    margin-top: 5px;
-    margin-right: 5px;
-    margin-left: 5px;
-    font-size: 40px;
-    height: 60px;
-    width: 60px;
+    margin: 2px;
+    font-size: 16px;
+    height: 32px;
+    width: 32px;
     color: black;
 }
 
-.clearBtn {
-    font-size: 40px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 60%;
-}
-
 .addBtn {
-    width: 100px;
-    height: 100px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
 }
 
-.hudBtn{
-    width: auto;
-}
-.flipBtn {
-    font-size: 40px;
+.clearBtn, .flipBtn {
+    font-size: 14px;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 60%;
+    margin: 2px auto;
+    width: 70%;
+    height: 26px;
 }
 
 .colorsList {
-    border: 2px #DDDDDD solid;
+    border: 1px #DDDDDD solid;
     background: #DDDDDD;
-    font-size: 30px;
+    font-size: 12px;
     text-align: center;
     display: block;
-    margin: auto;
-    margin-bottom: 5px;
-    border-radius: 10px;
+    margin: 2px auto;
+    border-radius: 5px;
     width: 80%;
 }
 
 .manaBtn {
-    background-color: black;
-    border: none;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 90%;
-    border-radius: 30px;
+    height: 22px;
+    width: 22px;
+    border-radius: 11px;
+}
+
+.B { background: #232323; }
+.G { background: #336600; }
+.R { background: #E13C1E; }
+.U { background: #0066cc; }
+.W { background: #dce0bb; }
+
+.hud {
     height: 50px;
-    width: 50px;
-}
-
-.B {
-    background-image: url("../images/B_BW.png");
-}
-
-.G {
-    background-image: url("../images/G_BW.png");
-}
-
-.R {
-    background-image: url("../images/R_BW.png");
-}
-
-.U {
-    background-image: url("../images/U_BW.png");
-}
-
-.W {
-    background-image: url("../images/W_BW.png");
-}
-
-.playerSlots {
-    margin-right: -5px;
-    margin-left: -5px;
-    border: none;
-    border-spacing: 0;
-}
-
-#allPLayers {
     width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: black;
+    box-sizing: border-box;
+    padding: 5px;
+    z-index: 10;
 }
 
-.safeButtons {
-    float: left;
-    display: inline;
+.hud button {
+    height: 38px;
+    width: auto;
+    padding: 0 8px;
+    font-size: 14px;
+    margin: 2px;
+    border-radius: 3px;
+    vertical-align: middle;
 }
 
-.warningButtons {
-    display: inline;
-    float: right;
-}
+.safeButtons { float: left; display: inline; }
+.warningButtons { display: inline; float: right; }
+.warningButtons button { background-color: red; border-color: red; color: white; width: auto; height: 38px; padding: 0 10px; font-size: 14px; }
+.nextline { display: none; }
 
-.warningButtons button{
-    background-color: red;
-    border-color: red;
-}
-
-.nextline {
-    clear: both;
-}
-
-.adviceSection {
-    font-size: 16px;
-}
 </style>
 </head>
 
 <body>
-    <div id="test">
-    </div>
-    <div id="allPlayers" class="playerSlots">
-    </div>
+    <div id="allPlayers" class="playerSlots"></div>
     <div class="hud">
         <div class="safeButtons">
             <button onclick="addPlayer()" class="hudBtn">Add Player</button>
+            <button onclick="removePlayer()" class="hudBtn">Remove</button>
             <button onclick="playSixty()" class="hudBtn">20</button>
             <button onclick="playCommander()" class="hudBtn">40</button>
             <button onclick="doneEditing()" class="hudBtn">Play</button>
@@ -241,489 +168,394 @@ button {
         <div class="warningButtons">
             <button onclick="reset()" class="hudBtn">Reset</button>
         </div>
-        <div class="nextline adviceSection">
-            Having a slow or laggy mobile experience? We recommend Google Chrome.
-        </div>
+        <!-- Status message area -->
+        <span id="hudMessage" style="color: #ff6666; font-size: 13px; margin-left: 10px; line-height: 38px;"></span>
     </div>
     <script>
     "use strict";
 
-var numPlayers = 1;
+    var numPlayers = 1;
 
-class BasePlayer {
-    constructor(name) {
+    function BasePlayer(name) {
         this.name = name;
         this.life = 20;
-        this.colors = "WUBRG".split("");
-        this.renderElement = NaN;
+        this.colors = ["W", "U", "B", "R", "G"];
+        this.renderElement = null;
         this.flipped = false;
-        this.colorString = "";
         this.editing = true;
         this.lifeDisplayElement = null;
     }
-    static unJSON(json_obj) {
-        var p = new BasePlayer();
-        // debug the deserialized player attributes
-        // console.log("loading JSON into self:");
-        // console.log("player data: " + json_obj);
+
+    BasePlayer.unJSON = function(json_obj) {
+        var p = new BasePlayer("");
         for (var v in json_obj) {
-            // debug individual attribute values
-            // console.log("Setting this.[" + v + "] to " + json_obj[v]);
-            p[v] = json_obj[v];
+            if (json_obj.hasOwnProperty(v)) {
+                p[v] = json_obj[v];
+            }
         }
         return p;
-    }
-    flip() {
-        this.flipped = !this.flipped;
-    }
-    clearColors() {
-        this.colors = [];
-    }
-    refresh() {
-        this.render(this.renderElement);
-    }
-    getColors() {
-        return this.colors;
-    }
-    getColorString() {
-        return this.colors.join(",");
-    }
-    getLife() {
-        return this.life;
-    }
-    getName() {
-        return this.playerName;
-    }
-    xcrementLife(n) {
-        // console.log("Attempt to add " + n + " life to " + this.name);
-        this.life += n;
-        // console.log(this.name + ".life=" + this.life);
-    }
-    setColors(colorString) {
-        colorString =
-            colorString[0] + colorString + colorString[colorString.length - 1];
-        var gradString = "";
-        for (var i = 0; i < colorString.length; i++) {
-            var c = colorString[i].toLowerCase();
-            if (c === "r") {
-                // gradString += "red"
-                gradString += "#E13C1E";
-            } else if (c === "g") {
-                // gradString += "green"
-                gradString += "#336600";
-            } else if (c === "u") {
-                // gradString += "blue"
-                gradString += "#0066cc";
-            } else if (c === "w") {
-                // gradString += "white"
-                gradString += "#dce0bb";
-            } else if (c === "b") {
-                // gradString += "black"
-                gradString += "#232323";
-            }
-            if (i != colorString.length - 1) {
-                gradString += ",";
-            }
-        }
-        // console.log("Set " + this.playerName + " background to " + gradString)
-        this.colors.push(colorString);
-    }
-    getColorsStyle() {
-        if (this.colors.length > 1) {
-            this.colors = "linear-gradient(135deg," + this.colors + ")";
-        }
-        return gradString;
-    }
-    render(containingElement) {
-        // memorize which containingElement to render to/refresh
-        this.renderElement = containingElement;
-        // delete all child nodes (useful for case of refresh)
-        for (var i = containingElement.children.length - 1; i >= 0; i--) {
-            containingElement.removeChild(containingElement.children[i]);
-        }
-        // evaluate a reference to self
-        var that = this;
+    };
 
-        // the whole player thing
+    BasePlayer.prototype.flip = function() {
+        this.flipped = !this.flipped;
+    };
+
+    BasePlayer.prototype.clearColors = function() {
+        this.colors = [];
+    };
+
+    BasePlayer.prototype.refresh = function() {
+        if (this.renderElement) {
+            this.render(this.renderElement);
+        }
+    };
+
+    BasePlayer.prototype.xcrementLife = function(n) {
+        this.life += n;
+    };
+
+    BasePlayer.prototype.render = function(containingElement) {
+        this.renderElement = containingElement;
+        while (containingElement.children.length > 0) {
+            containingElement.removeChild(containingElement.children[0]);
+        }
+
+        var that = this;
         var playerCard = document.createElement("div");
         containingElement.appendChild(playerCard);
-        playerCard.classList.add("player");
-        var colorString = "";
-        if (this.colors.length > 0) {
-            colorString = this.colors.join("");
-        } else {
-            colorString = "WUBRG";
-        }
-        var styleString = gradStyleString(colorString);
-        playerCard.style.background = styleString;
+        playerCard.className = "player";
 
-        // I don't remember what texture is for
+        var colorString = this.colors.length > 0 ? this.colors.join("") : "WUBRG";
+        playerCard.style.backgroundColor = getSolidColorFallback(colorString);
+
         var textureDiv = document.createElement("div");
         playerCard.appendChild(textureDiv);
-        textureDiv.classList.add("texture");
+        textureDiv.className = "texture";
 
-        // another containing containingElement
         var boxDiv = document.createElement("div");
         textureDiv.appendChild(boxDiv);
-        boxDiv.classList.add("box");
-
-        // finally, the meat of it.
-        // the card should have a top half for life
-        // and a bottom half for color
-        // only the top should flip
+        boxDiv.className = "box";
 
         var topHalf = document.createElement("div");
-        textureDiv.appendChild(topHalf);
-        topHalf.classList.add("topHalf");
         boxDiv.appendChild(topHalf);
-
-        // decide whether to render flipped
         if (this.flipped) {
+            topHalf.style.webkitTransform = "rotate(180deg)";
             topHalf.style.transform = "rotate(180deg)";
-        } else {
-            topHalf.style.transform = "";
         }
 
         var bottomHalf = document.createElement("div");
-        textureDiv.appendChild(bottomHalf);
-        bottomHalf.classList.add("topHalf");
         boxDiv.appendChild(bottomHalf);
 
-        // player name input
         var nameInput = document.createElement("input");
         topHalf.appendChild(nameInput);
-        nameInput.classList.add("playerName");
-        nameInput.placeholder = name;
+        nameInput.className = "playerName";
         nameInput.value = this.name;
-
-        // allow changing name
         nameInput.addEventListener("keyup", function() {
-            // console.log("set " + that.name + " to " + nameInput.value);
             that.name = nameInput.value;
         });
 
-        // life adding buttons
         var plusDiv = document.createElement("div");
         topHalf.appendChild(plusDiv);
-        plusDiv.classList.add("xcrement");
+        plusDiv.className = "xcrement";
 
         var adds = [5, 1];
-        var btn = NaN;
-        for (var i = adds.length - 1; i >= 0; i--) {
+        for (var i = 0; i < adds.length; i++) {
             var btn = document.createElement("button");
-            btn.classList.add("addBtn");
+            btn.className = "addBtn";
             plusDiv.appendChild(btn);
             btn.innerHTML = "+" + adds[i];
-            var n = adds[i];
-            // nested function definitions to force evaluation of required variables
-            // AKA lots of closure nonsense
-            btn.addEventListener(
-                "click",
-                (function(N) {
-                    return function() {
-                        that.xcrementLife(N);
-                        that.refreshLife();
-                    };
-                })(n)
-            );
+            (function(nVal) {
+                btn.addEventListener("click", function() {
+                    that.xcrementLife(nVal);
+                    that.refreshLife();
+                });
+            })(adds[i]);
         }
 
-        // life display span
         var lifeDisplay = document.createElement("span");
         this.lifeDisplayElement = lifeDisplay;
         topHalf.appendChild(lifeDisplay);
-        lifeDisplay.classList.add("lifeTotal");
+        lifeDisplay.className = "lifeTotal";
         lifeDisplay.innerHTML = this.life;
 
-        // life subtract buttons
         var minusDiv = document.createElement("div");
         topHalf.appendChild(minusDiv);
-        minusDiv.classList.add("xcrement");
+        minusDiv.className = "xcrement";
 
         var subs = [-5, -1];
-        var btn = NaN;
-        for (var i = subs.length - 1; i >= 0; i--) {
-            var btn = document.createElement("button");
-            btn.classList.add("addBtn");
-            minusDiv.appendChild(btn);
-            btn.innerHTML = subs[i];
-            var n = subs[i];
-            btn.addEventListener(
-                "click",
-                (function(N) {
-                    return function() {
-                        that.xcrementLife(N);
-                        that.refreshLife();
-                    };
-                })(n)
-            );
+        for (var j = 0; j < subs.length; j++) {
+            var btnSub = document.createElement("button");
+            btnSub.className = "addBtn";
+            minusDiv.appendChild(btnSub);
+            btnSub.innerHTML = subs[j];
+            (function(nVal) {
+                btnSub.addEventListener("click", function() {
+                    that.xcrementLife(nVal);
+                    that.refreshLife();
+                });
+            })(subs[j]);
         }
 
         if (this.editing) {
-            // MTG color list
             var colorList = document.createElement("input");
             bottomHalf.appendChild(colorList);
-            colorList.classList.add("colorsList");
+            colorList.className = "colorsList";
             colorList.disabled = true;
             colorList.value = this.colors.join("");
 
-            // color setting buttons
-            var letters = "WUBRG".split("").reverse();
-            for (var i = letters.length - 1; i >= 0; i--) {
-                var btn = document.createElement("button");
-                bottomHalf.appendChild(btn);
-                btn.classList.add("manaBtn");
-                btn.classList.add(letters[i]);
-                btn.addEventListener(
-                    "click",
-                    (function(c) {
-                        return function() {
-                            that.colors.push(c);
-                            // console.log(that.name + " add color " + c + " => " + that.colors);
-                            that.refresh();
-                        };
-                    })(letters[i])
-                );
+            var letters = ["W", "U", "B", "R", "G"];
+            for (var k = 0; k < letters.length; k++) {
+                var manaBtn = document.createElement("button");
+                bottomHalf.appendChild(manaBtn);
+                manaBtn.className = "manaBtn " + letters[k];
+                (function(cChar) {
+                    manaBtn.addEventListener("click", function() {
+                        that.colors.push(cChar);
+                        that.refresh();
+                    });
+                })(letters[k]);
             }
 
-            // clear colors
             var clearColorsBtn = document.createElement("button");
             bottomHalf.appendChild(clearColorsBtn);
-            clearColorsBtn.classList.add("clearBtn");
+            clearColorsBtn.className = "clearBtn";
             clearColorsBtn.innerHTML = "CLR";
             clearColorsBtn.addEventListener("click", function() {
                 that.clearColors();
+                that.refresh();
             });
 
-            // flip button
             var flipButton = document.createElement("button");
             bottomHalf.appendChild(flipButton);
-            flipButton.classList.add("flipBtn");
+            flipButton.className = "flipBtn";
             flipButton.innerHTML = "Flip";
             flipButton.addEventListener("click", function() {
                 that.flip();
                 that.refresh();
             });
         }
-    }
-    refreshLife() {
-        if (this.lifeDisplayElement != null) {
+    };
+
+    BasePlayer.prototype.refreshLife = function() {
+        if (this.lifeDisplayElement !== null) {
             this.lifeDisplayElement.innerHTML = this.life;
         } else {
-            alert("render element not found, instead refreshing")
             this.refresh();
         }
-    }
-}
+    };
 
-class PlayerManager {
-    constructor() {
+    function PlayerManager() {
         this.players = [];
         this.count = 0;
-        this.renderElement = NaN;
+        this.renderElement = null;
         this.editing = true;
     }
-    static unJSON(json_obj) {
+
+    PlayerManager.unJSON = function(json_obj) {
         var plist = json_obj["players"];
         var pm = new PlayerManager();
-        // display what data was deserialized
-        // console.log(Object.keys(json_obj));
-        for (var v in plist) {
-            var p = BasePlayer.unJSON(plist[v]);
-            pm.loadExistingPlayer(p);
+        if (plist) {
+            for (var v = 0; v < plist.length; v++) {
+                var p = BasePlayer.unJSON(plist[v]);
+                pm.loadExistingPlayer(p);
+            }
         }
         return pm;
-    }
-    loadExistingPlayer(p) {
+    };
+
+    PlayerManager.prototype.loadExistingPlayer = function(p) {
         this.players.push(p);
         this.count++;
-    }
-    addPlayer() {
-        this.players.push(new BasePlayer(""));
-        // once rendered, clear the colors so that the expected color change happens on first click
-        this.players[this.count].clearColors();
-        this.players[this.count].editing = this.editing;
+    };
+
+    PlayerManager.prototype.addPlayer = function() {
+        var p = new BasePlayer("");
+        p.clearColors();
+        p.editing = this.editing;
+        this.players.push(p);
         this.count++;
-    }
-    render(containingElement) {
-        this.renderElement = containingElement;
-        // loop through target containing containingElement and delete all children
-        for (var i = containingElement.children.length - 1; i >= 0; i--) {
-            containingElement.removeChild(containingElement.children[i]);
+    };
+    
+    PlayerManager.prototype.removePlayer = function() {
+        if (this.players.length > 1) {
+            this.players.pop();
+            this.count--;
+            this.render(this.renderElement);
+            serializeGameManager(this);
+        } else {
+            alert("You must keep at least one player.");
         }
-        // instantiate an HTML table
-        var table = document.createElement("TABLE");
-        // add it as a child of the rendering target
-        containingElement.appendChild(table);
-        var row = table.insertRow();
-        for (var i = 0; i < this.players.length; i++) {
-            // loop through list of players, for each one creating HTML table column
-            // and render those players each into their own column
-            // console.log("rendering player " + i);
-            var col = row.insertCell();
-            this.players[i].render(col, this.editing);
+    };
+
+PlayerManager.prototype.render = function(containingElement) {
+    this.renderElement = containingElement;
+    while (containingElement.children.length > 0) {
+        containingElement.removeChild(containingElement.children[0]);
+    }
+    var totalPlayers = this.players.length;
+
+    // Use a strict 2-column layout for up to 6 players so shapes remain uniform
+    var cols = (totalPlayers > 4 && totalPlayers !== 5) ? 3 : 2;
+    if (totalPlayers === 1) cols = 1;
+
+    var totalRows = Math.ceil(totalPlayers / cols);
+    if (totalRows === 0) totalRows = 1;
+
+    for (var i = 0; i < totalPlayers; i++) {
+        var cell = document.createElement("div");
+        cell.className = "grid-cell";
+
+        var row = Math.floor(i / cols);
+        var col = i % cols;
+        var itemsInThisRow = (row === totalRows - 1) ? (totalPlayers - (row * cols)) : cols;
+
+        // If it's a 5-player game and this is the lone 5th player, center it and make it full width
+        if (totalPlayers === 5 && i === 4) {
+            cell.style.width = "100%";
+            cell.style.left = "0%";
+        } else {
+            cell.style.width = (100 / itemsInThisRow) + "%";
+            cell.style.left = (col * (100 / cols)) + "%";
         }
-    }
-    refresh() {
-        this.render(this.renderElement);
-    }
-    reset() {
-        this.setEditing(true);
-        this.count = 0;
-        var l = this.players.length;
-        this.players.splice(0, l);
-    }
-    playCommander() {
-        for (var i = this.players.length - 1; i >= 0; i--) {
-            this.players[i].life = 40;
-        }
-    }
-    playSixty() {
-        for (var i = this.players.length - 1; i >= 0; i--) {
-            this.players[i].life = 20;
-        }
-    }
-    setEditing(state) {
-        this.editing = state;
-        for (var i = this.players.length - 1; i >= 0; i--) {
-            this.players[i].editing = this.editing;
-        }
-    }
-}
-// ========== Storage ==========
-var isStorageAvailable = false;
-//determine if local storage is available
-if (typeof Storage !== "undefined") {
-    // Code for localStorage/sessionStorage.
-    isStorageAvailable = true;
-} else {
-    // Sorry! No Web Storage support..
-    alert(
-        "Local storage is not available on your device, sessions will not be saved!"
-    );
-}
 
-// ========== Globals ==========
-var manager = new PlayerManager();
-if (isStorageAvailable) {
-    var objStr = localStorage.getItem("savedManager");
-    // alert("saved game state str:" + objStr);
-    // console.log(item);
-    if (objStr != null) {
-        try {
-            var item = JSON.parse(objStr);
-            manager = PlayerManager.unJSON(item);
-        } catch (e) {
-            manager = new PlayerManager();
-            console.log(e);
-            alert(e);
-        }
+        cell.style.height = (100 / totalRows) + "%";
+        cell.style.top = (row * (100 / totalRows)) + "%";
+
+        containingElement.appendChild(cell);
+        this.players[i].render(cell);
     }
-}
-// debug manager attributes
-// console.log(manager);
-manager.render(document.getElementById("allPlayers"));
-// add the first and second players
-if (manager.players.length < 2) {
-    for (var i = 0; i < 2; i++) {
-        manager.addPlayer();
-    }
-}
-// display it
-manager.refresh();
-
-// MTG color to styling helper functions
-function gradientString(colors) {
-    var grads = [];
-    for (var i = 0; i < colors.length; i++) {
-        var c = colors[i].toLowerCase();
-        if (c === "r") {
-            // gradString += "red"
-            grads.push("#E13C1E");
-        } else if (c === "g") {
-            // grads.push("green");
-            grads.push("#336600");
-        } else if (c === "u") {
-            // grads.push("blue");
-            grads.push("#0066cc");
-        } else if (c === "w") {
-            // grads.push("white");
-            grads.push("#dce0bb");
-        } else if (c === "b") {
-            // grads.push("black");
-            grads.push("#444444");
-        }
-    }
-    // console.log("grads " + grads);
-    return grads.join(",");
-}
-
-function gradStyleString(colorString) {
-    if (colorString.length > 0) {
-        // the ends of the diagonal gradient are tiny, so double them up
-
-        colorString =
-            colorString[0] + colorString + colorString[colorString.length - 1];
-
-        return (
-            "linear-gradient(135deg," +
-            gradientString(colorString.split("")) +
-            ")"
-        );
-    } else {
-        return "linear-gradient(135deg,#111111)";
-    }
-}
-
-function serializeGameManager(target_manager) {
-    var serialized = JSON.stringify(target_manager);
-    console.log("saving: " + serialized);
-    localStorage.setItem("savedManager", serialized);
-}
-
-var addPlayer = function() {
-    manager.addPlayer();
-    manager.refresh();
-    console.log("all players: " + manager.players);
-    console.log("Added player " + String(numPlayers));
-    manager.render(document.getElementById("allPlayers"));
-    serializeGameManager(manager);
 };
 
-function replaceAll(source, search, replace) {
-    return source.split(search).join(replace);
-}
+    PlayerManager.prototype.refresh = function() {
+        if (this.renderElement) {
+            this.render(this.renderElement);
+        }
+    };
 
-function playCommander() {
-    manager.playCommander();
-    manager.refresh();
-    serializeGameManager(manager);
-}
+    PlayerManager.prototype.reset = function() {
+        this.setEditing(true);
+        this.count = 0;
+        this.players = [];
+    };
 
-function playSixty() {
-    manager.playSixty();
-    manager.refresh();
-    serializeGameManager(manager);
-}
+    PlayerManager.prototype.playCommander = function() {
+        for (var i = 0; i < this.players.length; i++) {
+            this.players[i].life = 40;
+        }
+    };
 
-function reset() {
-    manager.reset();
-    for (var i = 0; i < 2; i++) {
-        manager.addPlayer();
+    PlayerManager.prototype.playSixty = function() {
+        for (var i = 0; i < this.players.length; i++) {
+            this.players[i].life = 20;
+        }
+    };
+
+    PlayerManager.prototype.setEditing = function(state) {
+        this.editing = state;
+        for (var i = 0; i < this.players.length; i++) {
+            this.players[i].editing = this.editing;
+        }
+    };
+
+    function getSolidColorFallback(colorString) {
+        var c = colorString.charAt(0).toUpperCase();
+        if (c === "R") return "#E13C1E";
+        if (c === "G") return "#336600";
+        if (c === "U") return "#0066cc";
+        if (c === "W") return "#555544";
+        return "#232323";
+    }
+
+    var isStorageAvailable = false;
+    try {
+        if (typeof localStorage !== "undefined") {
+            isStorageAvailable = true;
+        }
+    } catch (e) {
+        isStorageAvailable = false;
+    }
+
+    var manager = new PlayerManager();
+    if (isStorageAvailable) {
+        var objStr = localStorage.getItem("savedManager");
+        if (objStr !== null) {
+            try {
+                var item = JSON.parse(objStr);
+                manager = PlayerManager.unJSON(item);
+            } catch (e) {
+                manager = new PlayerManager();
+            }
+        }
+    }
+
+    var container = document.getElementById("allPlayers");
+    manager.render(container);
+
+    if (manager.players.length < 2) {
+        for (var i = 0; i < 2; i++) {
+            manager.addPlayer();
+        }
         manager.refresh();
     }
-    serializeGameManager(manager);
-}
 
-function doneEditing() {
-    manager.setEditing(!manager.editing);
-    manager.refresh();
-    serializeGameManager(manager);
-}
-setInterval(function() {
-    serializeGameManager(manager);
-}, 5000);
+    function serializeGameManager(target_manager) {
+        if (isStorageAvailable) {
+            try {
+                var serialized = JSON.stringify(target_manager);
+                localStorage.setItem("savedManager", serialized);
+            } catch (err) {}
+        }
+    }
+
+    var addPlayer = function() {
+        var msgElem = document.getElementById("hudMessage");
+        if (manager.players.length >= 6) {
+            msgElem.innerHTML = "Max 6 players allowed";
+            setTimeout(function() {
+                msgElem.innerHTML = "";
+            }, 3000); // Clears message after 3 seconds
+            return;
+        }
+        msgElem.innerHTML = "";
+        manager.addPlayer();
+        manager.refresh();
+        serializeGameManager(manager);
+    };
+    
+    function removePlayer() {
+        manager.removePlayer();
+    }
+
+    function playCommander() {
+        manager.playCommander();
+        manager.refresh();
+        serializeGameManager(manager);
+    }
+
+    function playSixty() {
+        manager.playSixty();
+        manager.refresh();
+        serializeGameManager(manager);
+    }
+
+    function reset() {
+        manager.reset();
+        for (var j = 0; j < 2; j++) {
+            manager.addPlayer();
+        }
+        manager.refresh();
+        serializeGameManager(manager);
+    }
+
+    function doneEditing() {
+        manager.setEditing(!manager.editing);
+        manager.refresh();
+        serializeGameManager(manager);
+    }
+
+    setInterval(function() {
+        serializeGameManager(manager);
+    }, 5000);
     </script>
 </body>
-
 </html>
