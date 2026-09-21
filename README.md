@@ -3,45 +3,47 @@
 An e-paper-friendly MTG life counter for 2-6 players, optimized for the Tolino Vision 4 HD browser.
 It is a standalone HTML app and can run either from a LAN server or from the Android localhost-server APK, which also beginners should be able to install easily.
 
+![MTG Life Counter on Tolino](screenshot.png)
+
 ## Install the APK
 
 Download the latest APK from the project's GitHub Releases page. No build tools are needed if you use a released APK.
 
-### Enable USB debugging on Tolino firmware 16.2.0
+### Enable developer mode on Tolino firmware 16.2.0
 
-On the reader:
+On the reader, open the search bar and enter this exact code:
 
-1. Open **Settings**.
-2. Open **Device information** or **About device**.
-3. Tap **Build number** seven times in quick succession.
-4. Return to Settings and open **Developer options**.
-5. Enable **USB debugging** and confirm the warning.
-6. Connect the reader by USB and accept the debugging confirmation if it appears.
-
-On Ubuntu, install `adb` if needed:
-
-```sh
-sudo apt update
-sudo apt install adb
-adb devices
+```text
+112358132fb
 ```
 
-The reader should appear in `adb devices`. Install the downloaded release APK with:
+Follow the on-screen instructions to enable developer mode.
+
+The apk can be copied on the reader as mass storage device and then installed in these developer mode 2nd page. Then reboot and navigate the internal browser (found under the Menu at top left) to http://127.0.0.1:8080/ to open the life counter.
+
+
+Alternatively, USB debugging can be enabled and the apk installed over adb. For that, on Ubuntu, install `adb`:
+
+```sh
+sudo apt install adb
+```
+
+And respective apk:
 
 ```sh
 adb install -r MTG-Life-Counter-v1.0.0.apk
 ```
 
-Start the local server without opening the browser:
+Start the local server without reboot:
 
 ```sh
 adb shell am start -n com.example.mtglifecounter/.MainActivity
 ```
 
-Open the reader browser manually at:
+Open the reader browser through adb:
 
-```text
-http://127.0.0.1:8080/
+```sh
+adb shell am start -a android.intent.action.VIEW -d http://127.0.0.1:8080/
 ```
 
 The APK also starts the localhost service after `BOOT_COMPLETED` where the Tolino permits boot receivers. The browser still needs to be opened manually.
