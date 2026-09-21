@@ -28,7 +28,7 @@ adb devices
 The reader should appear in `adb devices`. Install the downloaded release APK with:
 
 ```sh
-adb install -r MTG-Life-Counter.apk
+adb install -r MTG-Life-Counter-v1.0.0.apk
 ```
 
 Start the local server without opening the browser:
@@ -82,7 +82,13 @@ make apk
 The APK is created at:
 
 ```text
-android/app/build/outputs/apk/debug/app-debug.apk
+android/app/build/outputs/apk/debug/MTG-Life-Counter-v1.0.0.apk
+```
+
+The version is controlled by the Makefile and can be changed when building:
+
+```sh
+make apk VERSION=1.0.1
 ```
 
 ## Make Targets
@@ -105,4 +111,5 @@ Useful overrides:
 make server PORT=8081
 make apk GRADLE=./.tools/gradle-8.5/bin/gradle
 make install-apk ADB=/path/to/adb
+make apk VERSION=1.0.1
 ```

@@ -1,10 +1,12 @@
 SHELL := /bin/sh
 
 PORT ?= 8000
+VERSION ?= 1.0.0
 GRADLE_VERSION ?= 8.5
 GRADLE ?= ./.tools/gradle-$(GRADLE_VERSION)/bin/gradle
 ADB ?= adb
-APK := android/app/build/outputs/apk/debug/app-debug.apk
+APK := android/app/build/outputs/apk/debug/MTG-Life-Counter-v$(VERSION).apk
+DEBUG_APK := android/app/build/outputs/apk/debug/app-debug.apk
 
 .PHONY: help setup env server apk install-apk clean
 
@@ -27,7 +29,9 @@ server:
 
 apk: setup
 	[ -x "$(GRADLE)" ] || { printf '%s\n' 'Gradle setup failed or Android SDK is missing.' >&2; exit 1; }
-	$(GRADLE) -p android assembleDebug
+	$(GRADLE) -p android -PappVersion=$(VERSION) assembleDebug
+	cp "$(DEBUG_APK)" "$(APK)"
+	printf 'APK: %s\n' "$(APK)"
 
 install-apk: apk
 	$(ADB) get-state >/dev/null 2>&1 || { printf '%s\n' 'No adb device found. Enable USB debugging and connect the reader.' >&2; exit 1; }
