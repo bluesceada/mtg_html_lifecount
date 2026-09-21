@@ -72,7 +72,13 @@ The app targets API 19 for the Tolino while compiling against Platform 33. On Ub
 sudo apt install openjdk-21-jdk google-android-platform-33-installer google-android-build-tools-34-installer adb
 ```
 
-The project uses the SDK at `/usr/lib/android-sdk` through the ignored file `android/local.properties`. If the SDK is installed elsewhere, change that file locally without committing it.
+The project uses the SDK at `/usr/lib/android-sdk` through the ignored file `android/local.properties`. Create it from the tracked example:
+
+```sh
+cp android/local.properties.example android/local.properties
+```
+
+If the SDK is installed elsewhere, edit `android/local.properties` locally without committing it.
 
 The repository uses Python to create a virtual environment and download Gradle locally into ignored `.tools/`; it does not require `/opt` or a system Gradle installation:
 
