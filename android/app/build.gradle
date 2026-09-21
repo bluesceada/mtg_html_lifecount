@@ -1,0 +1,32 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.example.mtglifecounter"
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.mtglifecounter"
+        minSdk 19
+        targetSdk 19
+        versionCode 1
+        versionName "1.0"
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ["$projectDir/src/main/assets"]
+        }
+    }
+}
+
+tasks.register("copyWebApp", Copy) {
+    from rootProject.file("../index.html")
+    into "$projectDir/src/main/assets"
+    rename { "index.html" }
+}
+
+tasks.named("preBuild") {
+    dependsOn(tasks.named("copyWebApp"))
+}

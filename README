@@ -1,0 +1,29 @@
+## LAN server
+
+Run `./serve.sh` and open `http://<computer-ip>:8000/` on the reader.
+
+## Android localhost server
+
+The `android/` project packages the current `index.html` into a small APK. On launch it starts a localhost-only HTTP server on port `8080` and opens the reader browser at:
+
+`http://127.0.0.1:8080/`
+
+Build it with Android SDK/Gradle installed:
+
+```sh
+cd android
+gradle assembleDebug
+```
+
+Install the resulting `android/app/build/outputs/apk/debug/app-debug.apk`, then launch `MTG Life Counter`. The service stays alive using a foreground notification where supported.
+
+The same workflows are available through `Makefile`:
+
+```sh
+make env
+make server
+make apk
+make install-apk
+```
+
+Use `make server PORT=8080` for another LAN port. Use `make apk GRADLE=./gradlew` when the repository has a Gradle wrapper.
