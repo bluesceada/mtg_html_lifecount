@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MTG Life Counter</title>
 <style>
 html, body {
@@ -11,8 +11,8 @@ html, body {
     overflow: hidden;
     font-family: sans-serif;
     font-size: 16px;
-    background: black;
-    color: white;
+    background: white;
+    color: black;
 }
 
 #allPlayers {
@@ -27,6 +27,7 @@ html, body {
 /* Absolute grid cell positioning that bypasses table height bugs */
 .grid-cell {
     position: absolute;
+    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     padding: 2px;
     overflow: hidden;
@@ -36,7 +37,7 @@ html, body {
     width: 100%;
     height: 100%;
     text-align: center;
-    background: #232323;
+    background: white;
     display: table;
     box-sizing: border-box;
 }
@@ -51,18 +52,18 @@ html, body {
     margin: 0 auto;
     padding: 4px;
     width: 98%;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 10px;
+    -webkit-box-sizing: border-box;
+    background-color: white;
+    border: 1px solid black;
 }
 
 .playerName {
     width: 85%;
+    display: block;
     text-align: center;
-    margin-top: 2px;
-    border-radius: 5px;
+    margin: 2px auto 0;
+    line-height: 24px;
     font-size: 16px;
-    border: 1px #DDDDDD solid;
-    background: #DDDDDD;
 }
 
 .xcrement {
@@ -71,16 +72,16 @@ html, body {
 }
 
 .lifeTotal {
-    color: white;
+    color: black;
     display: block;
     margin: auto;
     font-size: 180%;
 }
 
 button {
-    border-radius: 3px;
-    border: 1px solid #DDDDDD;
-    background: #DDDDDD;
+    border-radius: 0;
+    border: 1px solid black;
+    background: white;
     margin: 2px;
     font-size: 16px;
     height: 32px;
@@ -94,7 +95,7 @@ button {
     font-size: 18px;
 }
 
-.clearBtn, .flipBtn {
+.flipBtn {
     font-size: 14px;
     display: block;
     margin: 2px auto;
@@ -102,28 +103,17 @@ button {
     height: 26px;
 }
 
-.colorsList {
-    border: 1px #DDDDDD solid;
-    background: #DDDDDD;
-    font-size: 12px;
-    text-align: center;
-    display: block;
-    margin: 2px auto;
-    border-radius: 5px;
-    width: 80%;
+.commanderDamage {
+    border-top: 1px solid black;
+    margin: 3px auto 0;
+    padding-top: 2px;
+    width: 94%;
+    font-size: 11px;
 }
 
-.manaBtn {
-    height: 22px;
-    width: 22px;
-    border-radius: 11px;
-}
-
-.B { background: #232323; }
-.G { background: #336600; }
-.R { background: #E13C1E; }
-.U { background: #0066cc; }
-.W { background: #dce0bb; }
+.damageRow { white-space: nowrap; }
+.damageRow button { height: 22px; width: 24px; font-size: 13px; }
+.damageTotal { display: inline-block; min-width: 20px; }
 
 .hud {
     height: 50px;
@@ -131,7 +121,9 @@ button {
     position: absolute;
     bottom: 0;
     left: 0;
-    background: black;
+    background: white;
+    border-top: 1px solid black;
+    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     padding: 5px;
     z-index: 10;
@@ -149,7 +141,7 @@ button {
 
 .safeButtons { float: left; display: inline; }
 .warningButtons { display: inline; float: right; }
-.warningButtons button { background-color: red; border-color: red; color: white; width: auto; height: 38px; padding: 0 10px; font-size: 14px; }
+.warningButtons button { background-color: white; border-color: black; color: black; width: auto; height: 38px; padding: 0 10px; font-size: 14px; }
 .nextline { display: none; }
 
 </style>
@@ -158,11 +150,13 @@ button {
 <body>
     <div id="allPlayers" class="playerSlots"></div>
     <div class="hud">
-        <div class="safeButtons">
+        <div id="safeButtons" class="safeButtons">
             <button onclick="addPlayer()" class="hudBtn">Add Player</button>
             <button onclick="removePlayer()" class="hudBtn">Remove</button>
-            <button onclick="playSixty()" class="hudBtn">20</button>
-            <button onclick="playCommander()" class="hudBtn">40</button>
+            <button onclick="setStartingLife(20)" class="hudBtn">20</button>
+            <button onclick="setStartingLife(30)" class="hudBtn">30</button>
+            <button onclick="setStartingLife(40)" class="hudBtn">40</button>
+            <button onclick="playCommander()" class="hudBtn">Commander</button>
             <button onclick="doneEditing()" class="hudBtn">Play</button>
         </div>
         <div class="warningButtons">
@@ -176,6 +170,16 @@ button {
 
     var numPlayers = 1;
 
+    function addClickHandler(element, handler) {
+        if (element.addEventListener) {
+            element.addEventListener("click", handler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent("onclick", handler);
+        } else {
+            element.onclick = handler;
+        }
+    }
+
     function BasePlayer(name) {
         this.name = name;
         this.life = 20;
@@ -183,7 +187,11 @@ button {
         this.renderElement = null;
         this.flipped = false;
         this.editing = true;
+        this.commanderDamage = [];
         this.lifeDisplayElement = null;
+        this.renderIndex = 0;
+        this.renderPlayers = [];
+        this.renderCommanderMode = false;
     }
 
     BasePlayer.unJSON = function(json_obj) {
@@ -206,7 +214,7 @@ button {
 
     BasePlayer.prototype.refresh = function() {
         if (this.renderElement) {
-            this.render(this.renderElement);
+            this.render(this.renderElement, this.renderIndex, this.renderPlayers, this.renderCommanderMode);
         }
     };
 
@@ -214,8 +222,25 @@ button {
         this.life += n;
     };
 
-    BasePlayer.prototype.render = function(containingElement) {
+    BasePlayer.prototype.getCommanderDamage = function(opponentIndex) {
+        if (typeof this.commanderDamage[opponentIndex] !== "number") {
+            this.commanderDamage[opponentIndex] = 0;
+        }
+        return this.commanderDamage[opponentIndex];
+    };
+
+    BasePlayer.prototype.xcrementCommanderDamage = function(opponentIndex, amount) {
+        this.commanderDamage[opponentIndex] = this.getCommanderDamage(opponentIndex) + amount;
+        if (this.commanderDamage[opponentIndex] < 0) {
+            this.commanderDamage[opponentIndex] = 0;
+        }
+    };
+
+    BasePlayer.prototype.render = function(containingElement, playerIndex, players, commanderMode) {
         this.renderElement = containingElement;
+        this.renderIndex = playerIndex;
+        this.renderPlayers = players;
+        this.renderCommanderMode = commanderMode;
         while (containingElement.children.length > 0) {
             containingElement.removeChild(containingElement.children[0]);
         }
@@ -224,9 +249,6 @@ button {
         var playerCard = document.createElement("div");
         containingElement.appendChild(playerCard);
         playerCard.className = "player";
-
-        var colorString = this.colors.length > 0 ? this.colors.join("") : "WUBRG";
-        playerCard.style.backgroundColor = getSolidColorFallback(colorString);
 
         var textureDiv = document.createElement("div");
         playerCard.appendChild(textureDiv);
@@ -246,13 +268,10 @@ button {
         var bottomHalf = document.createElement("div");
         boxDiv.appendChild(bottomHalf);
 
-        var nameInput = document.createElement("input");
-        topHalf.appendChild(nameInput);
-        nameInput.className = "playerName";
-        nameInput.value = this.name;
-        nameInput.addEventListener("keyup", function() {
-            that.name = nameInput.value;
-        });
+        var playerLabel = document.createElement("div");
+        topHalf.appendChild(playerLabel);
+        playerLabel.className = "playerName";
+        playerLabel.innerHTML = "Player " + (playerIndex + 1);
 
         var plusDiv = document.createElement("div");
         topHalf.appendChild(plusDiv);
@@ -265,7 +284,7 @@ button {
             plusDiv.appendChild(btn);
             btn.innerHTML = "+" + adds[i];
             (function(nVal) {
-                btn.addEventListener("click", function() {
+                addClickHandler(btn, function() {
                     that.xcrementLife(nVal);
                     that.refreshLife();
                 });
@@ -289,7 +308,7 @@ button {
             minusDiv.appendChild(btnSub);
             btnSub.innerHTML = subs[j];
             (function(nVal) {
-                btnSub.addEventListener("click", function() {
+                addClickHandler(btnSub, function() {
                     that.xcrementLife(nVal);
                     that.refreshLife();
                 });
@@ -297,42 +316,52 @@ button {
         }
 
         if (this.editing) {
-            var colorList = document.createElement("input");
-            bottomHalf.appendChild(colorList);
-            colorList.className = "colorsList";
-            colorList.disabled = true;
-            colorList.value = this.colors.join("");
-
-            var letters = ["W", "U", "B", "R", "G"];
-            for (var k = 0; k < letters.length; k++) {
-                var manaBtn = document.createElement("button");
-                bottomHalf.appendChild(manaBtn);
-                manaBtn.className = "manaBtn " + letters[k];
-                (function(cChar) {
-                    manaBtn.addEventListener("click", function() {
-                        that.colors.push(cChar);
-                        that.refresh();
-                    });
-                })(letters[k]);
-            }
-
-            var clearColorsBtn = document.createElement("button");
-            bottomHalf.appendChild(clearColorsBtn);
-            clearColorsBtn.className = "clearBtn";
-            clearColorsBtn.innerHTML = "CLR";
-            clearColorsBtn.addEventListener("click", function() {
-                that.clearColors();
-                that.refresh();
-            });
-
             var flipButton = document.createElement("button");
             bottomHalf.appendChild(flipButton);
             flipButton.className = "flipBtn";
             flipButton.innerHTML = "Flip";
-            flipButton.addEventListener("click", function() {
+            addClickHandler(flipButton, function() {
                 that.flip();
                 that.refresh();
             });
+        }
+
+        if (commanderMode) {
+            var commanderDiv = document.createElement("div");
+            commanderDiv.className = "commanderDamage";
+            bottomHalf.appendChild(commanderDiv);
+            var commanderTitle = document.createElement("div");
+            commanderTitle.innerHTML = "Commander damage";
+            commanderDiv.appendChild(commanderTitle);
+            for (var opponentIndex = 0; opponentIndex < players.length; opponentIndex++) {
+                if (opponentIndex === playerIndex) continue;
+                var damageRow = document.createElement("div");
+                damageRow.className = "damageRow";
+                damageRow.innerHTML = "Player " + (opponentIndex + 1);
+                var damageDown = document.createElement("button");
+                damageDown.innerHTML = "-";
+                var damageTotal = document.createElement("span");
+                damageTotal.className = "damageTotal";
+                damageTotal.innerHTML = this.getCommanderDamage(opponentIndex);
+                var damageUp = document.createElement("button");
+                damageUp.innerHTML = "+";
+                damageRow.appendChild(damageDown);
+                damageRow.appendChild(damageTotal);
+                damageRow.appendChild(damageUp);
+                commanderDiv.appendChild(damageRow);
+                (function(target, index) {
+                    addClickHandler(damageDown, function() {
+                        target.xcrementCommanderDamage(index, -1);
+                        manager.refresh();
+                        serializeGameManager(manager);
+                    });
+                    addClickHandler(damageUp, function() {
+                        target.xcrementCommanderDamage(index, 1);
+                        manager.refresh();
+                        serializeGameManager(manager);
+                    });
+                })(this, opponentIndex);
+            }
         }
     };
 
@@ -349,6 +378,7 @@ button {
         this.count = 0;
         this.renderElement = null;
         this.editing = true;
+        this.commanderMode = false;
     }
 
     PlayerManager.unJSON = function(json_obj) {
@@ -422,7 +452,7 @@ PlayerManager.prototype.render = function(containingElement) {
         cell.style.top = (row * (100 / totalRows)) + "%";
 
         containingElement.appendChild(cell);
-        this.players[i].render(cell);
+        this.players[i].render(cell, i, this.players, this.commanderMode);
     }
 };
 
@@ -434,19 +464,18 @@ PlayerManager.prototype.render = function(containingElement) {
 
     PlayerManager.prototype.reset = function() {
         this.setEditing(true);
+        this.commanderMode = false;
         this.count = 0;
         this.players = [];
     };
 
     PlayerManager.prototype.playCommander = function() {
-        for (var i = 0; i < this.players.length; i++) {
-            this.players[i].life = 40;
-        }
+        this.commanderMode = !this.commanderMode;
     };
 
-    PlayerManager.prototype.playSixty = function() {
+    PlayerManager.prototype.setStartingLife = function(life) {
         for (var i = 0; i < this.players.length; i++) {
-            this.players[i].life = 20;
+            this.players[i].life = life;
         }
     };
 
@@ -456,15 +485,6 @@ PlayerManager.prototype.render = function(containingElement) {
             this.players[i].editing = this.editing;
         }
     };
-
-    function getSolidColorFallback(colorString) {
-        var c = colorString.charAt(0).toUpperCase();
-        if (c === "R") return "#E13C1E";
-        if (c === "G") return "#336600";
-        if (c === "U") return "#0066cc";
-        if (c === "W") return "#555544";
-        return "#232323";
-    }
 
     var isStorageAvailable = false;
     try {
@@ -496,6 +516,9 @@ PlayerManager.prototype.render = function(containingElement) {
             manager.addPlayer();
         }
         manager.refresh();
+    }
+    if (!manager.editing) {
+        document.getElementById("safeButtons").style.display = "none";
     }
 
     function serializeGameManager(target_manager) {
@@ -532,23 +555,28 @@ PlayerManager.prototype.render = function(containingElement) {
         serializeGameManager(manager);
     }
 
-    function playSixty() {
-        manager.playSixty();
+    function setStartingLife(life) {
+        manager.setStartingLife(life);
         manager.refresh();
         serializeGameManager(manager);
     }
 
     function reset() {
+        if (!confirm("Reset the game?")) {
+            return;
+        }
         manager.reset();
         for (var j = 0; j < 2; j++) {
             manager.addPlayer();
         }
+            document.getElementById("safeButtons").style.display = "block";
         manager.refresh();
         serializeGameManager(manager);
     }
 
     function doneEditing() {
-        manager.setEditing(!manager.editing);
+        manager.setEditing(false);
+        document.getElementById("safeButtons").style.display = "none";
         manager.refresh();
         serializeGameManager(manager);
     }
