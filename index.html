@@ -29,7 +29,7 @@ html, body {
     position: absolute;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    padding: 2px;
+    padding: 0;
     overflow: hidden;
 }
 
@@ -49,9 +49,9 @@ html, body {
 }
 
 .box {
-    margin: 0 auto;
-    padding: 4px;
-    width: 98%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
     -webkit-box-sizing: border-box;
     background-color: white;
     border: 1px solid black;
@@ -66,16 +66,27 @@ html, body {
     font-size: 16px;
 }
 
-.xcrement {
-    display: block;
-    margin: auto;
+.lifePanel {
+    display: inline-table;
+    vertical-align: middle;
+    width: 100%;
+    table-layout: fixed;
 }
+
+.lifePanel .xcrement,
+.lifePanel .lifeTotal {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.lifePanel .xcrement { width: 30%; }
+.lifePanel .lifeTotal { width: 40%; }
 
 .lifeTotal {
     color: black;
-    display: block;
     margin: auto;
-    font-size: 180%;
+    font-size: 280%;
 }
 
 button {
@@ -90,9 +101,18 @@ button {
 }
 
 .addBtn {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    display: block;
+    width: 56px;
+    height: 56px;
+    margin: 1px auto;
+    font-size: 24px;
+}
+
+.densePlayer .addBtn {
+    width: 44px;
+    height: 44px;
+    margin: 1px auto;
+    font-size: 21px;
 }
 
 .flipBtn {
@@ -103,17 +123,63 @@ button {
     height: 26px;
 }
 
-.commanderDamage {
-    border-top: 1px solid black;
-    margin: 3px auto 0;
-    padding-top: 2px;
-    width: 94%;
-    font-size: 11px;
+#commanderOverlay {
+    position: absolute;
+    left: 5%;
+    top: 5%;
+    width: 90%;
+    height: 90%;
+    padding: 8px;
+    background: white;
+    border: 2px solid black;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    z-index: 100;
+    overflow: auto;
+    font-size: 16px;
+}
+
+.commanderOverlayTitle {
+    text-align: center;
+    font-size: 22px;
+    line-height: 32px;
+}
+
+.commanderClose {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
+}
+
+.commanderToggle {
+    display: block;
+    width: 90%;
+    height: 52px;
+    margin: 6px auto;
+    font-size: 22px;
+}
+
+.commanderDamageGrid {
+    position: relative;
+    height: 82%;
+    margin-top: 8px;
 }
 
 .damageRow { white-space: nowrap; }
-.damageRow button { height: 22px; width: 24px; font-size: 13px; }
-.damageTotal { display: inline-block; min-width: 20px; }
+.damageRow {
+    position: absolute;
+    padding: 8px;
+    margin: 0;
+    line-height: 44px;
+    text-align: center;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.damageRow button { height: 44px; width: 44px; font-size: 22px; }
+.damageTotal { display: inline-block; min-width: 40px; font-size: 20px; text-align: center; }
 
 .hud {
     height: 50px;
@@ -157,7 +223,7 @@ button {
             <button onclick="setStartingLife(30)" class="hudBtn">30</button>
             <button onclick="setStartingLife(40)" class="hudBtn">40</button>
             <button onclick="playCommander()" class="hudBtn">Commander</button>
-            <button onclick="doneEditing()" class="hudBtn">Play</button>
+            <button id="rotateToggleButton" onclick="doneEditing()" class="hudBtn">Hide</button>
         </div>
         <div class="warningButtons">
             <button onclick="reset()" class="hudBtn">Reset</button>
@@ -186,12 +252,14 @@ button {
         this.colors = ["W", "U", "B", "R", "G"];
         this.renderElement = null;
         this.flipped = false;
+        this.rotation = 0;
         this.editing = true;
         this.commanderDamage = [];
         this.lifeDisplayElement = null;
         this.renderIndex = 0;
         this.renderPlayers = [];
         this.renderCommanderMode = false;
+        this.renderActiveDamagePlayer = -1;
     }
 
     BasePlayer.unJSON = function(json_obj) {
@@ -205,7 +273,7 @@ button {
     };
 
     BasePlayer.prototype.flip = function() {
-        this.flipped = !this.flipped;
+        this.rotation = (this.rotation + 90) % 360;
     };
 
     BasePlayer.prototype.clearColors = function() {
@@ -214,7 +282,7 @@ button {
 
     BasePlayer.prototype.refresh = function() {
         if (this.renderElement) {
-            this.render(this.renderElement, this.renderIndex, this.renderPlayers, this.renderCommanderMode);
+            this.render(this.renderElement, this.renderIndex, this.renderPlayers, this.renderCommanderMode, this.renderActiveDamagePlayer);
         }
     };
 
@@ -236,11 +304,29 @@ button {
         }
     };
 
-    BasePlayer.prototype.render = function(containingElement, playerIndex, players, commanderMode) {
+    BasePlayer.prototype.getTotalCommanderDamage = function() {
+        var totalDamage = 0;
+        for (var opponentIndex = 0; opponentIndex < this.commanderDamage.length; opponentIndex++) {
+            if (typeof this.commanderDamage[opponentIndex] === "number") {
+                totalDamage += this.commanderDamage[opponentIndex];
+            }
+        }
+        return totalDamage;
+    };
+
+    BasePlayer.prototype.getDisplayedLife = function(commanderMode) {
+        if (commanderMode) {
+            return this.life - this.getTotalCommanderDamage();
+        }
+        return this.life;
+    };
+
+    BasePlayer.prototype.render = function(containingElement, playerIndex, players, commanderMode, activeDamagePlayer) {
         this.renderElement = containingElement;
         this.renderIndex = playerIndex;
         this.renderPlayers = players;
         this.renderCommanderMode = commanderMode;
+        this.renderActiveDamagePlayer = activeDamagePlayer;
         while (containingElement.children.length > 0) {
             containingElement.removeChild(containingElement.children[0]);
         }
@@ -248,7 +334,21 @@ button {
         var that = this;
         var playerCard = document.createElement("div");
         containingElement.appendChild(playerCard);
-        playerCard.className = "player";
+        playerCard.className = players.length >= 5 ? "player densePlayer" : "player";
+        var rotation = typeof this.rotation === "number" ? this.rotation : (this.flipped ? 180 : 0);
+        if (rotation === 90 || rotation === 270) {
+            var cellWidth = containingElement.offsetWidth;
+            var cellHeight = containingElement.offsetHeight;
+            playerCard.style.position = "absolute";
+            playerCard.style.left = "50%";
+            playerCard.style.top = "50%";
+            playerCard.style.width = cellHeight + "px";
+            playerCard.style.height = cellWidth + "px";
+            playerCard.style.marginLeft = "-" + (cellHeight / 2) + "px";
+            playerCard.style.marginTop = "-" + (cellWidth / 2) + "px";
+        }
+        playerCard.style.webkitTransform = "rotate(" + rotation + "deg)";
+        playerCard.style.transform = "rotate(" + rotation + "deg)";
 
         var textureDiv = document.createElement("div");
         playerCard.appendChild(textureDiv);
@@ -260,11 +360,6 @@ button {
 
         var topHalf = document.createElement("div");
         boxDiv.appendChild(topHalf);
-        if (this.flipped) {
-            topHalf.style.webkitTransform = "rotate(180deg)";
-            topHalf.style.transform = "rotate(180deg)";
-        }
-
         var bottomHalf = document.createElement("div");
         boxDiv.appendChild(bottomHalf);
 
@@ -273,32 +368,12 @@ button {
         playerLabel.className = "playerName";
         playerLabel.innerHTML = "Player " + (playerIndex + 1);
 
-        var plusDiv = document.createElement("div");
-        topHalf.appendChild(plusDiv);
-        plusDiv.className = "xcrement";
-
-        var adds = [5, 1];
-        for (var i = 0; i < adds.length; i++) {
-            var btn = document.createElement("button");
-            btn.className = "addBtn";
-            plusDiv.appendChild(btn);
-            btn.innerHTML = "+" + adds[i];
-            (function(nVal) {
-                addClickHandler(btn, function() {
-                    that.xcrementLife(nVal);
-                    that.refreshLife();
-                });
-            })(adds[i]);
-        }
-
-        var lifeDisplay = document.createElement("span");
-        this.lifeDisplayElement = lifeDisplay;
-        topHalf.appendChild(lifeDisplay);
-        lifeDisplay.className = "lifeTotal";
-        lifeDisplay.innerHTML = this.life;
+        var lifePanel = document.createElement("div");
+        topHalf.appendChild(lifePanel);
+        lifePanel.className = "lifePanel";
 
         var minusDiv = document.createElement("div");
-        topHalf.appendChild(minusDiv);
+        lifePanel.appendChild(minusDiv);
         minusDiv.className = "xcrement";
 
         var subs = [-5, -1];
@@ -315,11 +390,35 @@ button {
             })(subs[j]);
         }
 
+        var lifeDisplay = document.createElement("span");
+        this.lifeDisplayElement = lifeDisplay;
+        lifePanel.appendChild(lifeDisplay);
+        lifeDisplay.className = "lifeTotal";
+        lifeDisplay.innerHTML = this.getDisplayedLife(commanderMode);
+
+        var plusDiv = document.createElement("div");
+        lifePanel.appendChild(plusDiv);
+        plusDiv.className = "xcrement";
+
+        var adds = [5, 1];
+        for (var i = 0; i < adds.length; i++) {
+            var btn = document.createElement("button");
+            btn.className = "addBtn";
+            plusDiv.appendChild(btn);
+            btn.innerHTML = "+" + adds[i];
+            (function(nVal) {
+                addClickHandler(btn, function() {
+                    that.xcrementLife(nVal);
+                    that.refreshLife();
+                });
+            })(adds[i]);
+        }
+
         if (this.editing) {
             var flipButton = document.createElement("button");
             bottomHalf.appendChild(flipButton);
             flipButton.className = "flipBtn";
-            flipButton.innerHTML = "Flip";
+            flipButton.innerHTML = "Rotate";
             addClickHandler(flipButton, function() {
                 that.flip();
                 that.refresh();
@@ -327,17 +426,60 @@ button {
         }
 
         if (commanderMode) {
+            var commanderToggle = document.createElement("button");
+            commanderToggle.className = "commanderToggle";
+            commanderToggle.innerHTML = activeDamagePlayer === playerIndex ? "Hide damage" : "Commander Dmg";
+            topHalf.appendChild(commanderToggle);
+            addClickHandler(commanderToggle, function() {
+                if (manager.activeDamagePlayer === playerIndex) {
+                    manager.activeDamagePlayer = -1;
+                } else {
+                    manager.activeDamagePlayer = playerIndex;
+                }
+                manager.refresh();
+            });
+        }
+
+        if (commanderMode && activeDamagePlayer === playerIndex) {
             var commanderDiv = document.createElement("div");
-            commanderDiv.className = "commanderDamage";
-            bottomHalf.appendChild(commanderDiv);
+            commanderDiv.id = "commanderOverlay";
+            document.body.appendChild(commanderDiv);
             var commanderTitle = document.createElement("div");
+            commanderTitle.className = "commanderOverlayTitle";
             commanderTitle.innerHTML = "Commander damage";
             commanderDiv.appendChild(commanderTitle);
+            var closeButton = document.createElement("button");
+            closeButton.className = "commanderClose";
+            closeButton.innerHTML = "X";
+            commanderDiv.appendChild(closeButton);
+            addClickHandler(closeButton, function() {
+                manager.activeDamagePlayer = -1;
+                manager.refresh();
+            });
+            var damageGrid = document.createElement("div");
+            damageGrid.className = "commanderDamageGrid";
+            commanderDiv.appendChild(damageGrid);
+            var overlayCols = 2;
+            if (players.length === 1) overlayCols = 1;
+            var overlayRows = Math.ceil(players.length / overlayCols);
             for (var opponentIndex = 0; opponentIndex < players.length; opponentIndex++) {
                 if (opponentIndex === playerIndex) continue;
                 var damageRow = document.createElement("div");
                 damageRow.className = "damageRow";
                 damageRow.innerHTML = "Player " + (opponentIndex + 1);
+                var overlayRow = Math.floor(opponentIndex / overlayCols);
+                var overlayCol = opponentIndex % overlayCols;
+                var overlayItems = (overlayRow === overlayRows - 1) ?
+                    (players.length - (overlayRow * overlayCols)) : overlayCols;
+                if (players.length === 5 && opponentIndex === 4) {
+                    damageRow.style.width = "100%";
+                    damageRow.style.left = "0%";
+                } else {
+                    damageRow.style.width = (100 / overlayItems) + "%";
+                    damageRow.style.left = (overlayCol * (100 / overlayCols)) + "%";
+                }
+                damageRow.style.height = (100 / overlayRows) + "%";
+                damageRow.style.top = (overlayRow * (100 / overlayRows)) + "%";
                 var damageDown = document.createElement("button");
                 damageDown.innerHTML = "-";
                 var damageTotal = document.createElement("span");
@@ -348,7 +490,7 @@ button {
                 damageRow.appendChild(damageDown);
                 damageRow.appendChild(damageTotal);
                 damageRow.appendChild(damageUp);
-                commanderDiv.appendChild(damageRow);
+                damageGrid.appendChild(damageRow);
                 (function(target, index) {
                     addClickHandler(damageDown, function() {
                         target.xcrementCommanderDamage(index, -1);
@@ -367,7 +509,7 @@ button {
 
     BasePlayer.prototype.refreshLife = function() {
         if (this.lifeDisplayElement !== null) {
-            this.lifeDisplayElement.innerHTML = this.life;
+            this.lifeDisplayElement.innerHTML = this.getDisplayedLife(this.renderCommanderMode);
         } else {
             this.refresh();
         }
@@ -379,6 +521,7 @@ button {
         this.renderElement = null;
         this.editing = true;
         this.commanderMode = false;
+        this.activeDamagePlayer = -1;
     }
 
     PlayerManager.unJSON = function(json_obj) {
@@ -422,10 +565,31 @@ PlayerManager.prototype.render = function(containingElement) {
     while (containingElement.children.length > 0) {
         containingElement.removeChild(containingElement.children[0]);
     }
+    var existingOverlay = document.getElementById("commanderOverlay");
+    if (existingOverlay) {
+        existingOverlay.parentNode.removeChild(existingOverlay);
+    }
     var totalPlayers = this.players.length;
 
-    // Use a strict 2-column layout for up to 6 players so shapes remain uniform
-    var cols = (totalPlayers > 4 && totalPlayers !== 5) ? 3 : 2;
+    for (var rotationIndex = 0; rotationIndex < totalPlayers; rotationIndex++) {
+        this.players[rotationIndex].rotation = 0;
+    }
+    if (totalPlayers === 2 || totalPlayers === 3) {
+        this.players[0].rotation = 90;
+        this.players[1].rotation = 270;
+    } else if (totalPlayers === 4 || totalPlayers === 5) {
+        this.players[0].rotation = 90;
+        this.players[1].rotation = 270;
+        this.players[2].rotation = 90;
+        this.players[3].rotation = 270;
+    } else if (totalPlayers === 6) {
+        for (var pairPlayer = 0; pairPlayer < 6; pairPlayer++) {
+            this.players[pairPlayer].rotation = pairPlayer % 2 === 0 ? 90 : 270;
+        }
+    }
+
+    // Six players use two wide columns and three rows for readable controls.
+    var cols = 2;
     if (totalPlayers === 1) cols = 1;
 
     var totalRows = Math.ceil(totalPlayers / cols);
@@ -452,7 +616,7 @@ PlayerManager.prototype.render = function(containingElement) {
         cell.style.top = (row * (100 / totalRows)) + "%";
 
         containingElement.appendChild(cell);
-        this.players[i].render(cell, i, this.players, this.commanderMode);
+        this.players[i].render(cell, i, this.players, this.commanderMode, this.activeDamagePlayer);
     }
 };
 
@@ -471,6 +635,7 @@ PlayerManager.prototype.render = function(containingElement) {
 
     PlayerManager.prototype.playCommander = function() {
         this.commanderMode = !this.commanderMode;
+        this.activeDamagePlayer = -1;
     };
 
     PlayerManager.prototype.setStartingLife = function(life) {
@@ -511,16 +676,12 @@ PlayerManager.prototype.render = function(containingElement) {
     var container = document.getElementById("allPlayers");
     manager.render(container);
 
-    if (manager.players.length < 2) {
-        for (var i = 0; i < 2; i++) {
+    if (manager.players.length < 4) {
+        for (var i = manager.players.length; i < 4; i++) {
             manager.addPlayer();
         }
         manager.refresh();
     }
-    if (!manager.editing) {
-        document.getElementById("safeButtons").style.display = "none";
-    }
-
     function serializeGameManager(target_manager) {
         if (isStorageAvailable) {
             try {
@@ -528,6 +689,21 @@ PlayerManager.prototype.render = function(containingElement) {
                 localStorage.setItem("savedManager", serialized);
             } catch (err) {}
         }
+    }
+
+    function setSetupButtonsVisible(visible) {
+        var safeButtons = document.getElementById("safeButtons");
+        for (var buttonIndex = 0; buttonIndex < safeButtons.children.length; buttonIndex++) {
+            var button = safeButtons.children[buttonIndex];
+            if (button.id !== "rotateToggleButton") {
+                button.style.display = visible ? "inline-block" : "none";
+            }
+        }
+    }
+
+    if (!manager.editing) {
+        setSetupButtonsVisible(false);
+        document.getElementById("rotateToggleButton").innerHTML = "Show";
     }
 
     var addPlayer = function() {
@@ -566,17 +742,19 @@ PlayerManager.prototype.render = function(containingElement) {
             return;
         }
         manager.reset();
-        for (var j = 0; j < 2; j++) {
+        for (var j = 0; j < 4; j++) {
             manager.addPlayer();
         }
-            document.getElementById("safeButtons").style.display = "block";
+        setSetupButtonsVisible(true);
+        document.getElementById("rotateToggleButton").innerHTML = "Hide";
         manager.refresh();
         serializeGameManager(manager);
     }
 
     function doneEditing() {
-        manager.setEditing(false);
-        document.getElementById("safeButtons").style.display = "none";
+        manager.setEditing(!manager.editing);
+        setSetupButtonsVisible(manager.editing);
+        document.getElementById("rotateToggleButton").innerHTML = manager.editing ? "Hide" : "Show";
         manager.refresh();
         serializeGameManager(manager);
     }
