@@ -46,6 +46,8 @@ http://127.0.0.1:8080/
 
 The APK also starts the localhost service after `BOOT_COMPLETED` where the Tolino permits boot receivers. The browser still needs to be opened manually.
 
+While the service runs in the background, the Tolino may show a faint eye icon in the top-right corner. In rare situations the background service may stop; rebooting the Tolino starts it again. While you are using it in the webbrowser, that is not a problem.
+
 ## Use Over Wi-Fi
 
 On the computer, run:
