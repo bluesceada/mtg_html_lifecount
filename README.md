@@ -1,6 +1,7 @@
 # E-Reader MTG Life Counter
 
-An e-paper-friendly MTG life counter for 2-6 players, optimized for the Tolino Vision 4 HD browser. It is a standalone HTML app and can run either from a LAN server or from the Android localhost-server APK.
+An e-paper-friendly MTG life counter for 2-6 players, optimized for the Tolino Vision 4 HD browser.
+It is a standalone HTML app and can run either from a LAN server or from the Android localhost-server APK, which also beginners should be able to install easily.
 
 ## Install the APK
 
