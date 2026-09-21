@@ -246,6 +246,51 @@ button {
         }
     }
 
+    function addHoldHandler(element, handler) {
+        var holdTimer = null;
+        var repeatTimer = null;
+        var holding = false;
+
+        function stopHolding() {
+            holding = false;
+            if (holdTimer !== null) {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+            }
+            if (repeatTimer !== null) {
+                clearInterval(repeatTimer);
+                repeatTimer = null;
+            }
+        }
+
+        function startHolding(event) {
+            if (holding) return;
+            holding = true;
+            if (event && event.preventDefault) event.preventDefault();
+            handler();
+            holdTimer = setTimeout(function() {
+                repeatTimer = setInterval(handler, 500);
+            }, 700);
+        }
+
+        if (element.addEventListener) {
+            element.addEventListener("mousedown", startHolding, false);
+            element.addEventListener("mouseup", stopHolding, false);
+            element.addEventListener("mouseout", stopHolding, false);
+            element.addEventListener("touchstart", startHolding, false);
+            element.addEventListener("touchend", stopHolding, false);
+            element.addEventListener("touchcancel", stopHolding, false);
+        } else if (element.attachEvent) {
+            element.attachEvent("onmousedown", startHolding);
+            element.attachEvent("onmouseup", stopHolding);
+            element.attachEvent("onmouseout", stopHolding);
+        } else {
+            element.onmousedown = startHolding;
+            element.onmouseup = stopHolding;
+            element.onmouseout = stopHolding;
+        }
+    }
+
     function BasePlayer(name) {
         this.name = name;
         this.life = 20;
@@ -383,7 +428,7 @@ button {
             minusDiv.appendChild(btnSub);
             btnSub.innerHTML = subs[j];
             (function(nVal) {
-                addClickHandler(btnSub, function() {
+                addHoldHandler(btnSub, function() {
                     that.xcrementLife(nVal);
                     that.refreshLife();
                 });
@@ -406,12 +451,12 @@ button {
             btn.className = "addBtn";
             plusDiv.appendChild(btn);
             btn.innerHTML = "+" + adds[i];
-            (function(nVal) {
-                addClickHandler(btn, function() {
+            (function(nVal, button) {
+                addHoldHandler(button, function() {
                     that.xcrementLife(nVal);
                     that.refreshLife();
                 });
-            })(adds[i]);
+            })(adds[i], btn);
         }
 
         if (this.editing) {
@@ -491,18 +536,20 @@ button {
                 damageRow.appendChild(damageTotal);
                 damageRow.appendChild(damageUp);
                 damageGrid.appendChild(damageRow);
-                (function(target, index) {
-                    addClickHandler(damageDown, function() {
+                (function(target, index, totalElement, downButton, upButton) {
+                    addHoldHandler(downButton, function() {
                         target.xcrementCommanderDamage(index, -1);
-                        manager.refresh();
+                        totalElement.innerHTML = target.getCommanderDamage(index);
+                        target.refreshLife();
                         serializeGameManager(manager);
                     });
-                    addClickHandler(damageUp, function() {
+                    addHoldHandler(upButton, function() {
                         target.xcrementCommanderDamage(index, 1);
-                        manager.refresh();
+                        totalElement.innerHTML = target.getCommanderDamage(index);
+                        target.refreshLife();
                         serializeGameManager(manager);
                     });
-                })(this, opponentIndex);
+                })(this, opponentIndex, damageTotal, damageDown, damageUp);
             }
         }
     };
@@ -522,6 +569,7 @@ button {
         this.editing = true;
         this.commanderMode = false;
         this.activeDamagePlayer = -1;
+        this.startingLife = 20;
     }
 
     PlayerManager.unJSON = function(json_obj) {
@@ -543,6 +591,7 @@ button {
 
     PlayerManager.prototype.addPlayer = function() {
         var p = new BasePlayer("");
+        p.life = this.startingLife;
         p.clearColors();
         p.editing = this.editing;
         this.players.push(p);
@@ -639,8 +688,11 @@ PlayerManager.prototype.render = function(containingElement) {
     };
 
     PlayerManager.prototype.setStartingLife = function(life) {
+        this.startingLife = life;
+        this.activeDamagePlayer = -1;
         for (var i = 0; i < this.players.length; i++) {
             this.players[i].life = life;
+            this.players[i].commanderDamage = [];
         }
     };
 
