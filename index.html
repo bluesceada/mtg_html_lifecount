@@ -29,7 +29,7 @@ html, body {
     position: absolute;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    padding: 0;
+    padding: 4px;
     overflow: hidden;
 }
 
@@ -49,12 +49,12 @@ html, body {
 }
 
 .box {
-    margin: 0;
+    margin: 1px;
     padding: 0;
-    width: 100%;
     -webkit-box-sizing: border-box;
+    box-sizing: border-box;
     background-color: white;
-    border: 1px solid black;
+    border: 1px solid grey;
 }
 
 .playerName {
@@ -73,54 +73,70 @@ html, body {
     table-layout: fixed;
 }
 
-.lifePanel .xcrement,
-.lifePanel .lifeTotal {
+.lifePanel .xcrement {
     display: table-cell;
     vertical-align: middle;
     text-align: center;
 }
 
-.lifePanel .xcrement { width: 30%; }
-.lifePanel .lifeTotal { width: 40%; }
-
 .lifeTotal {
+    display: block;
+    width: 100%;
+    text-align: center;
     color: black;
-    margin: auto;
     font-size: 280%;
 }
 
+
+
+.lifeDelta {
+    font-size: 85%;
+    font-weight: bold;
+    color: #777;
+    height: 1em;
+    line-height: 1em;
+    margin-top: 2px;
+    visibility: hidden;
+}
+
 button {
-    border-radius: 0;
+    border-radius: 3px;
     border: 1px solid black;
     background: white;
     margin: 2px;
     font-size: 16px;
     height: 32px;
-    width: 32px;
+    width: 36px;
     color: black;
 }
 
 .addBtn {
     display: block;
-    width: 56px;
-    height: 56px;
+    width: 85%; /* 60px */
+    height: 60px;
     margin: 1px auto;
     font-size: 24px;
 }
 
 .densePlayer .addBtn {
-    width: 44px;
-    height: 44px;
+    width: 85%; /* 48px */
+    height: 52px;
     margin: 1px auto;
-    font-size: 21px;
+    font-size: 22px;
 }
 
 .flipBtn {
-    font-size: 14px;
-    display: block;
-    margin: 2px auto;
-    width: 70%;
-    height: 26px;
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 60px;
+    height: 60px;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.66); /* Slight transparency if it overlaps */
 }
 
 #commanderOverlay {
@@ -136,7 +152,26 @@ button {
     box-sizing: border-box;
     z-index: 100;
     overflow: auto;
-    font-size: 16px;
+    font-size: 18px;
+}
+
+.damageRow.selfSummary {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #555;
+}
+
+.damageRow.selfSummary .lifeTotal {
+    font-size: 280%;
+    line-height: 1;
+}
+
+.damageRow.selfSummary .selfSummaryMeta {
+    font-size: 13px;
+    color: #555;
+    margin-top: 4px;
 }
 
 .commanderOverlayTitle {
@@ -156,10 +191,60 @@ button {
 
 .commanderToggle {
     display: block;
-    width: 90%;
+    border-color: #777;
+    color: black;
+    width: 100%;
     height: 48px;
     margin: 6px auto;
     font-size: 20px;
+    line-height: 20px;
+    padding: 0 0 0 12px;
+}
+
+.commanderButton {
+    display: inline-flex;
+    align-items: center; /* Vertically centers children (text and mini-map) */
+    vertical-align: middle;
+    justify-content: space-between;
+    padding: 0;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+/* Optional wrapper or direct text container if you want explicit padding/centering */
+.commanderButtonText {
+    display: flex;
+    float: left;
+    font-size: 16px;
+    color: black;
+    align-items: center;
+    padding-left: 6px; /* Gives the text a little breathing room from the left edge */
+    height: 100%;
+}
+
+.commanderSummary {
+    float: right;
+    position: relative;
+    width: 44px;
+    height: 100%; 
+    background: #fff;
+    box-sizing: border-box;
+    margin-left: auto;
+}
+
+.summaryDamage {
+    position: absolute;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box; /* Added for legacy Android WebKit */
+    border: 1px solid #888;
+    font-size: 10px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1;
+    text-align: center;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .commanderDamageGrid {
@@ -168,18 +253,19 @@ button {
     margin-top: 8px;
 }
 
-.damageRow { white-space: nowrap; }
 .damageRow {
     position: absolute;
     padding: 8px;
-    margin: 0;
+    margin: 2px;
     line-height: 44px;
     text-align: center;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
+    white-space: nowrap;
+    /* border: 1px solid black; */
 }
 .damageRow button { height: 44px; width: 44px; font-size: 22px; }
-.damageTotal { display: inline-block; min-width: 40px; font-size: 20px; text-align: center; }
+.damageTotal { display: inline-block; min-width: 40px; font-size: 22px; text-align: center; }
 
 .hud {
     height: 50px;
@@ -223,7 +309,7 @@ button {
             <button onclick="setStartingLife(30)" class="hudBtn">30</button>
             <button onclick="setStartingLife(40)" class="hudBtn">40</button>
             <button onclick="playCommander()" class="hudBtn">Commander</button>
-            <button id="rotateToggleButton" onclick="doneEditing()" class="hudBtn">Hide</button>
+            <button id="rotateToggleButton" onclick="doneEditing()" class="hudBtn" style="font-weight: bold;">GO!</button>
         </div>
         <div class="warningButtons">
             <button onclick="reset()" class="hudBtn">Reset</button>
@@ -234,7 +320,7 @@ button {
     <script>
     "use strict";
 
-    var numPlayers = 1;
+    var numPlayers = 4;
 
     function addClickHandler(element, handler) {
         if (element.addEventListener) {
@@ -269,7 +355,7 @@ button {
             if (event && event.preventDefault) event.preventDefault();
             handler();
             holdTimer = setTimeout(function() {
-                repeatTimer = setInterval(handler, 500);
+                repeatTimer = setInterval(handler, 400); // 400 ms increment time
             }, 700);
         }
 
@@ -293,7 +379,7 @@ button {
 
     function BasePlayer(name) {
         this.name = name;
-        this.life = 20;
+        this.life = 40;
         this.colors = ["W", "U", "B", "R", "G"];
         this.renderElement = null;
         this.flipped = false;
@@ -305,6 +391,10 @@ button {
         this.renderPlayers = [];
         this.renderCommanderMode = false;
         this.renderActiveDamagePlayer = -1;
+        this.commanderSummaryElements = [];
+        this.currentDelta = 0;
+        this._deltaTimer = null;
+        this.deltaDisplayElement = null;
     }
 
     BasePlayer.unJSON = function(json_obj) {
@@ -333,6 +423,31 @@ button {
 
     BasePlayer.prototype.xcrementLife = function(n) {
         this.life += n;
+        this.showDelta(n);
+    };
+
+    BasePlayer.prototype.showDelta = function(n) {
+        if (!this.deltaDisplayElement) return;
+
+        if (this._deltaTimer) {
+            clearTimeout(this._deltaTimer);
+            this.currentDelta += n;
+        } else {
+            this.currentDelta = n;
+        }
+
+        var sign = this.currentDelta > 0 ? "+" : "";
+        this.deltaDisplayElement.innerHTML = sign + this.currentDelta;
+        this.deltaDisplayElement.style.visibility = "visible";
+
+        var that = this;
+        this._deltaTimer = setTimeout(function() {
+            if (that.deltaDisplayElement) {
+                that.deltaDisplayElement.style.visibility = "hidden";
+            }
+            that.currentDelta = 0;
+            that._deltaTimer = null;
+        }, 2500);
     };
 
     BasePlayer.prototype.getCommanderDamage = function(opponentIndex) {
@@ -346,6 +461,15 @@ button {
         this.commanderDamage[opponentIndex] = this.getCommanderDamage(opponentIndex) + amount;
         if (this.commanderDamage[opponentIndex] < 0) {
             this.commanderDamage[opponentIndex] = 0;
+        }
+    };
+
+    BasePlayer.prototype.refreshCommanderSummary = function() {
+        for (var summaryIndex = 0; summaryIndex < this.commanderSummaryElements.length; summaryIndex++) {
+            var opponentIndex = this.commanderSummaryElements[summaryIndex].opponentIndex;
+            this.commanderSummaryElements[summaryIndex].element.innerHTML =
+                "" + this.getCommanderDamage(opponentIndex);
+                //"P" + (opponentIndex + 1) + ":" + this.getCommanderDamage(opponentIndex);
         }
     };
 
@@ -365,6 +489,70 @@ button {
         }
         return this.life;
     };
+
+    function renderCommanderSummaryGrid(player, players, playerIndex, rotation, baseCols, baseRows, commanderSummaryContainer) {
+        player.commanderSummaryElements = [];
+        var isRotated90or270 = (rotation === 90 || rotation === 270);
+        var mapCols = isRotated90or270 ? baseRows : baseCols;
+        var mapRows = isRotated90or270 ? baseCols : baseRows;
+
+        for (var i = 0; i < players.length; i++) {
+            var isSelf = (i === playerIndex);
+            var r = Math.floor(i / baseCols);
+            var c = i % baseCols;
+
+            var mapR = r;
+            var mapC = c;
+
+            if (rotation === 90) {
+                mapR = baseCols - 1 - c;
+                mapC = r;
+            } else if (rotation === 180) {
+                mapR = baseRows - 1 - r;
+                mapC = baseCols - 1 - c;
+            } else if (rotation === 270) {
+                mapR = c;
+                mapC = baseRows - 1 - r;
+            }
+
+            var isLoneTrailingItem = (baseCols === 2 && players.length % 2 !== 0 && i === players.length - 1);
+            var cellWidth = 100 / mapCols;
+            var cellHeight = 100 / mapRows;
+            var cellLeft = mapC * (100 / mapCols);
+            var cellTop = mapR * (100 / mapRows);
+
+            if (isLoneTrailingItem) {
+                if (isRotated90or270) {
+                    cellHeight = 50;
+                    cellTop = 25;
+                } else {
+                    cellWidth = 50;
+                    cellLeft = 25;
+                }
+            }
+
+            var summaryElement = document.createElement("span");
+            summaryElement.className = "summaryDamage";
+            summaryElement.style.width = cellWidth + "%";
+            summaryElement.style.height = cellHeight + "%";
+            summaryElement.style.left = cellLeft + "%";
+            summaryElement.style.top = cellTop + "%";
+
+            if (isSelf) {
+                summaryElement.style.background = "#ccc"; // Gray block for self
+            }
+            
+            commanderSummaryContainer.appendChild(summaryElement);
+            
+            if (!isSelf) {
+                player.commanderSummaryElements.push({
+                    opponentIndex: i,
+                    element: summaryElement
+                });
+            }
+        }
+        player.refreshCommanderSummary();
+    }
 
     BasePlayer.prototype.render = function(containingElement, playerIndex, players, commanderMode, activeDamagePlayer) {
         this.renderElement = containingElement;
@@ -435,12 +623,23 @@ button {
             })(subs[j]);
         }
 
+        var lifeContainer = document.createElement("div");
+        lifePanel.appendChild(lifeContainer);
+        lifeContainer.style.display = "table-cell";
+        lifeContainer.style.verticalAlign = "middle";
+        lifeContainer.style.textAlign = "center";
+        lifeContainer.style.width = "38%";
+
         var lifeDisplay = document.createElement("span");
         this.lifeDisplayElement = lifeDisplay;
-        lifePanel.appendChild(lifeDisplay);
+        lifeContainer.appendChild(lifeDisplay);
         lifeDisplay.className = "lifeTotal";
         lifeDisplay.innerHTML = this.getDisplayedLife(commanderMode);
 
+        var deltaDisplay = document.createElement("div");
+        this.deltaDisplayElement = deltaDisplay;
+        deltaDisplay.className = "lifeDelta";
+        lifeContainer.appendChild(deltaDisplay);
         var plusDiv = document.createElement("div");
         lifePanel.appendChild(plusDiv);
         plusDiv.className = "xcrement";
@@ -461,9 +660,12 @@ button {
 
         if (this.editing) {
             var flipButton = document.createElement("button");
-            bottomHalf.appendChild(flipButton);
+            // bottomHalf.appendChild(flipButton);
+            // boxDiv.appendChild(flipButton);
+            containingElement.appendChild(flipButton); // Appends to unrotated grid cell
             flipButton.className = "flipBtn";
-            flipButton.innerHTML = "Rotate";
+            flipButton.innerHTML = "&#8634;";
+
             addClickHandler(flipButton, function() {
                 that.flip();
                 that.refresh();
@@ -473,7 +675,26 @@ button {
         if (commanderMode) {
             var commanderToggle = document.createElement("button");
             commanderToggle.className = "commanderToggle";
-            commanderToggle.innerHTML = activeDamagePlayer === playerIndex ? "Hide damage" : "Commander Dmg";
+            var commanderLabel = document.createElement("span");
+            commanderLabel.innerHTML = activeDamagePlayer === playerIndex ? "Hide damage" : "Commander Dmg";
+            commanderLabel.className = "commanderButtonText";
+            commanderToggle.appendChild(commanderLabel);
+            var commanderSummary = document.createElement("span");
+            commanderSummary.className = "commanderSummary";
+            commanderToggle.appendChild(commanderSummary);
+
+            // tiny summary of commander damage
+            this.commanderSummaryElements = [];
+            var baseCols = (players.length === 1) ? 1 : 2;
+            var baseRows = Math.ceil(players.length / baseCols);
+
+            var isRotated90or270 = (rotation === 90 || rotation === 270);
+            var mapCols = isRotated90or270 ? baseRows : baseCols;
+            var mapRows = isRotated90or270 ? baseCols : baseRows;
+
+            // Populate the mini-map grid via the helper function
+            renderCommanderSummaryGrid(this, players, playerIndex, rotation, baseCols, baseRows, commanderSummary);
+
             topHalf.appendChild(commanderToggle);
             addClickHandler(commanderToggle, function() {
                 if (manager.activeDamagePlayer === playerIndex) {
@@ -489,10 +710,12 @@ button {
             var commanderDiv = document.createElement("div");
             commanderDiv.id = "commanderOverlay";
             document.body.appendChild(commanderDiv);
+
             var commanderTitle = document.createElement("div");
             commanderTitle.className = "commanderOverlayTitle";
             commanderTitle.innerHTML = "Commander damage";
             commanderDiv.appendChild(commanderTitle);
+            
             var closeButton = document.createElement("button");
             closeButton.className = "commanderClose";
             closeButton.innerHTML = "X";
@@ -504,52 +727,105 @@ button {
             var damageGrid = document.createElement("div");
             damageGrid.className = "commanderDamageGrid";
             commanderDiv.appendChild(damageGrid);
+            
             var overlayCols = 2;
             if (players.length === 1) overlayCols = 1;
             var overlayRows = Math.ceil(players.length / overlayCols);
             for (var opponentIndex = 0; opponentIndex < players.length; opponentIndex++) {
-                if (opponentIndex === playerIndex) continue;
                 var damageRow = document.createElement("div");
                 damageRow.className = "damageRow";
-                damageRow.innerHTML = "Player " + (opponentIndex + 1);
+
+                if (opponentIndex === playerIndex) {
+                    damageRow.className += " selfSummary";
+                    
+                    var lifeSpan = document.createElement("span");
+                    lifeSpan.className = "lifeTotal";
+                    
+                    var metaSpan = document.createElement("span");
+                    metaSpan.className = "selfSummaryMeta";
+                    
+                    damageRow.appendChild(lifeSpan);
+                    damageRow.appendChild(metaSpan);
+                    
+                    this.overlayLifeElement = lifeSpan;
+                    this.overlayMetaElement = metaSpan;
+                    this.refreshOverlaySelfSummary();
+                } else {
+
+                    var playerrow = document.createElement("p");
+                    playerrow.innerHTML = "Player " + (opponentIndex + 1);
+                    damageRow.appendChild(playerrow);
+
+                    var damageDown = document.createElement("button");
+                    damageDown.innerHTML = "-";
+                    var damageTotal = document.createElement("span");
+                    damageTotal.className = "damageTotal";
+                    damageTotal.innerHTML = this.getCommanderDamage(opponentIndex);
+                    var damageUp = document.createElement("button");
+                    damageUp.innerHTML = "+";
+                    damageRow.appendChild(damageDown);
+                    damageRow.appendChild(damageTotal);
+                    damageRow.appendChild(damageUp);
+                    
+
+                    (function(target, index, totalElement, downButton, upButton) {
+                        var updateDamage = function(amount) {
+                            target.xcrementCommanderDamage(index, amount);
+                            totalElement.innerHTML = target.getCommanderDamage(index);
+                            target.refreshCommanderSummary();
+                            target.refreshLife();
+                            target.refreshOverlaySelfSummary();
+                            
+                            serializeGameManager(manager);
+                        };
+
+                        addHoldHandler(downButton, function() { updateDamage(-1); }, 150);
+                        addHoldHandler(upButton, function() { updateDamage(1); }, 150);
+                    })(this, opponentIndex, damageTotal, damageDown, damageUp);
+                }
+
+                damageGrid.appendChild(damageRow);
+
+                var overlayRotation = typeof this.rotation === "number" ? this.rotation : 0;
                 var overlayRow = Math.floor(opponentIndex / overlayCols);
                 var overlayCol = opponentIndex % overlayCols;
-                var overlayItems = (overlayRow === overlayRows - 1) ?
-                    (players.length - (overlayRow * overlayCols)) : overlayCols;
-                if (players.length === 5 && opponentIndex === 4) {
-                    damageRow.style.width = "100%";
-                    damageRow.style.left = "0%";
+                
+                var overlayRows = Math.ceil(players.length / overlayCols);
+                var isLastRow = (overlayRow === overlayRows - 1);
+                var itemsInThisRow = isLastRow ? (players.length - (overlayRow * overlayCols)) : overlayCols;
+
+                damageRow.style.position = "absolute";
+
+                var gridW = damageGrid.clientWidth;
+                var gridH = damageGrid.clientHeight;
+
+                // Base standard column width on the primary column count so single items don't blow up in size when rotated
+                var standardCellW = gridW / overlayCols;
+                var cellW = (itemsInThisRow === 1) ? standardCellW : (gridW / itemsInThisRow);
+                var cellH = gridH / overlayRows;
+                
+                var cellX = (itemsInThisRow === 1) ? (gridW - cellW) / 2 : (overlayCol * cellW);
+                //var cellX = (itemsInThisRow === 1) ? Math.round((gridW - cellW) / 2) : Math.round(overlayCol * cellW);
+                var cellY = overlayRow * cellH;
+
+                if (overlayRotation === 90 || overlayRotation === 270) {
+                    damageRow.style.width = cellH + "px";
+                    damageRow.style.height = cellW + "px";
+                    damageRow.style.left = (cellX + cellW / 2) + "px";
+                    damageRow.style.top = (cellY + cellH / 2) + "px";
+                    damageRow.style.marginLeft = "-" + (cellH / 2) + "px";
+                    damageRow.style.marginTop = "-" + (cellW / 2) + "px";
+                    damageRow.style.webkitTransform = "rotate(" + overlayRotation + "deg) translateY(-4px)";
+                    damageRow.style.transform = "rotate(" + overlayRotation + "deg) translateY(-4px)";
                 } else {
-                    damageRow.style.width = (100 / overlayItems) + "%";
-                    damageRow.style.left = (overlayCol * (100 / overlayCols)) + "%";
+                    damageRow.style.width = cellW + "px";
+                    damageRow.style.height = cellH + "px";
+                    damageRow.style.left = cellX + "px";
+                    damageRow.style.top = cellY + "px";
                 }
-                damageRow.style.height = (100 / overlayRows) + "%";
-                damageRow.style.top = (overlayRow * (100 / overlayRows)) + "%";
-                var damageDown = document.createElement("button");
-                damageDown.innerHTML = "-";
-                var damageTotal = document.createElement("span");
-                damageTotal.className = "damageTotal";
-                damageTotal.innerHTML = this.getCommanderDamage(opponentIndex);
-                var damageUp = document.createElement("button");
-                damageUp.innerHTML = "+";
-                damageRow.appendChild(damageDown);
-                damageRow.appendChild(damageTotal);
-                damageRow.appendChild(damageUp);
-                damageGrid.appendChild(damageRow);
-                (function(target, index, totalElement, downButton, upButton) {
-                    addHoldHandler(downButton, function() {
-                        target.xcrementCommanderDamage(index, -1);
-                        totalElement.innerHTML = target.getCommanderDamage(index);
-                        target.refreshLife();
-                        serializeGameManager(manager);
-                    });
-                    addHoldHandler(upButton, function() {
-                        target.xcrementCommanderDamage(index, 1);
-                        totalElement.innerHTML = target.getCommanderDamage(index);
-                        target.refreshLife();
-                        serializeGameManager(manager);
-                    });
-                })(this, opponentIndex, damageTotal, damageDown, damageUp);
+
+                damageRow.style.webkitTransform = "rotate(" + overlayRotation + "deg)";
+                damageRow.style.transform = "rotate(" + overlayRotation + "deg)";
             }
         }
     };
@@ -562,6 +838,13 @@ button {
         }
     };
 
+    BasePlayer.prototype.refreshOverlaySelfSummary = function() {
+        if (this.overlayLifeElement && this.overlayMetaElement) {
+            this.overlayLifeElement.innerHTML = this.getDisplayedLife(true);
+            this.overlayMetaElement.innerHTML = "Base: " + this.life + " | Dmg: -" + this.getTotalCommanderDamage();
+        }
+    };
+
     function PlayerManager() {
         this.players = [];
         this.count = 0;
@@ -569,7 +852,8 @@ button {
         this.editing = true;
         this.commanderMode = false;
         this.activeDamagePlayer = -1;
-        this.startingLife = 20;
+        this.startingLife = 40;
+        this.rotationLayoutCount = -1;
     }
 
     PlayerManager.unJSON = function(json_obj) {
@@ -580,6 +864,9 @@ button {
                 var p = BasePlayer.unJSON(plist[v]);
                 pm.loadExistingPlayer(p);
             }
+        }
+        if (typeof pm.startingLife !== "number") {
+            pm.startingLife = 40;
         }
         return pm;
     };
@@ -620,21 +907,24 @@ PlayerManager.prototype.render = function(containingElement) {
     }
     var totalPlayers = this.players.length;
 
-    for (var rotationIndex = 0; rotationIndex < totalPlayers; rotationIndex++) {
-        this.players[rotationIndex].rotation = 0;
-    }
-    if (totalPlayers === 2 || totalPlayers === 3) {
-        this.players[0].rotation = 90;
-        this.players[1].rotation = 270;
-    } else if (totalPlayers === 4 || totalPlayers === 5) {
-        this.players[0].rotation = 90;
-        this.players[1].rotation = 270;
-        this.players[2].rotation = 90;
-        this.players[3].rotation = 270;
-    } else if (totalPlayers === 6) {
-        for (var pairPlayer = 0; pairPlayer < 6; pairPlayer++) {
-            this.players[pairPlayer].rotation = pairPlayer % 2 === 0 ? 90 : 270;
+    if (this.rotationLayoutCount !== totalPlayers) {
+        for (var rotationIndex = 0; rotationIndex < totalPlayers; rotationIndex++) {
+            this.players[rotationIndex].rotation = 0;
         }
+        if (totalPlayers === 2 || totalPlayers === 3) {
+            this.players[0].rotation = 90;
+            this.players[1].rotation = 270;
+        } else if (totalPlayers === 4 || totalPlayers === 5) {
+            this.players[0].rotation = 90;
+            this.players[1].rotation = 270;
+            this.players[2].rotation = 90;
+            this.players[3].rotation = 270;
+        } else if (totalPlayers === 6) {
+            for (var pairPlayer = 0; pairPlayer < 6; pairPlayer++) {
+                this.players[pairPlayer].rotation = pairPlayer % 2 === 0 ? 90 : 270;
+            }
+        }
+        this.rotationLayoutCount = totalPlayers;
     }
 
     // Six players use two wide columns and three rows for readable controls.
@@ -652,10 +942,11 @@ PlayerManager.prototype.render = function(containingElement) {
         var col = i % cols;
         var itemsInThisRow = (row === totalRows - 1) ? (totalPlayers - (row * cols)) : cols;
 
-        // If it's a 5-player game and this is the lone 5th player, center it and make it full width
-        if (totalPlayers === 5 && i === 4) {
-            cell.style.width = "100%";
-            cell.style.left = "0%";
+        // If it's a lone item, make it slightly wider than standard (e.g., 75%) and center it
+        if (itemsInThisRow === 1 && cols > 1) {
+            var customWidth = 60; // Adjust this percentage (e.g., between 50 to 80) to taste
+            cell.style.width = customWidth + "%";
+            cell.style.left = ((100 - customWidth) / 2) + "%";
         } else {
             cell.style.width = (100 / itemsInThisRow) + "%";
             cell.style.left = (col * (100 / cols)) + "%";
@@ -676,10 +967,19 @@ PlayerManager.prototype.render = function(containingElement) {
     };
 
     PlayerManager.prototype.reset = function() {
+        var playerCount = this.players.length;
+        if (playerCount < 1) {
+            playerCount = 4;
+        }
         this.setEditing(true);
-        this.commanderMode = false;
+        //this.commanderMode = false;
+        this.activeDamagePlayer = -1;
         this.count = 0;
         this.players = [];
+        this.rotationLayoutCount = -1;
+        for (var playerIndex = 0; playerIndex < playerCount; playerIndex++) {
+            this.addPlayer();
+        }
     };
 
     PlayerManager.prototype.playCommander = function() {
@@ -755,7 +1055,7 @@ PlayerManager.prototype.render = function(containingElement) {
 
     if (!manager.editing) {
         setSetupButtonsVisible(false);
-        document.getElementById("rotateToggleButton").innerHTML = "Show";
+        document.getElementById("rotateToggleButton").innerHTML = "Options";
     }
 
     var addPlayer = function() {
@@ -772,6 +1072,12 @@ PlayerManager.prototype.render = function(containingElement) {
         manager.refresh();
         serializeGameManager(manager);
     };
+
+    window.addEventListener("resize", function() {
+        if (manager.activeDamagePlayer !== -1) {
+            manager.refresh();
+        }
+    });
     
     function removePlayer() {
         manager.removePlayer();
@@ -794,9 +1100,6 @@ PlayerManager.prototype.render = function(containingElement) {
             return;
         }
         manager.reset();
-        for (var j = 0; j < 4; j++) {
-            manager.addPlayer();
-        }
         setSetupButtonsVisible(true);
         document.getElementById("rotateToggleButton").innerHTML = "Hide";
         manager.refresh();
@@ -806,7 +1109,7 @@ PlayerManager.prototype.render = function(containingElement) {
     function doneEditing() {
         manager.setEditing(!manager.editing);
         setSetupButtonsVisible(manager.editing);
-        document.getElementById("rotateToggleButton").innerHTML = manager.editing ? "Hide" : "Show";
+        document.getElementById("rotateToggleButton").innerHTML = manager.editing ? "Hide" : "Options";
         manager.refresh();
         serializeGameManager(manager);
     }
