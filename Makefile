@@ -1,14 +1,15 @@
 SHELL := /bin/sh
 
 PORT ?= 8000
-VERSION ?= 1.0.0
+VERSION ?= 1.0.1
 GRADLE_VERSION ?= 8.5
 GRADLE ?= ./.tools/gradle-$(GRADLE_VERSION)/bin/gradle
 ADB ?= adb
 APK := android/app/build/outputs/apk/debug/MTG-Life-Counter-v$(VERSION).apk
 DEBUG_APK := android/app/build/outputs/apk/debug/app-debug.apk
+PKG ?= com.example.mtglifecounter
 
-.PHONY: help setup env server apk install-apk clean
+.PHONY: help setup env server apk install-apk launch clean
 
 help:
 	@printf '%s\n' \
@@ -17,6 +18,7 @@ help:
 		'make server       Start the LAN web server on PORT=$(PORT)' \
 		'make apk          Build the Android localhost-server APK' \
 		'make install-apk  Install the debug APK through adb' \
+		'make launch       Build, install, and launch the app' \
 		'make clean        Remove generated Android build output'
 
 setup:
@@ -27,15 +29,22 @@ env: setup
 server:
 	./serve.sh $(PORT)
 
-apk: setup
+$(APK): setup
 	[ -x "$(GRADLE)" ] || { printf '%s\n' 'Gradle setup failed or Android SDK is missing.' >&2; exit 1; }
 	$(GRADLE) -p android -PappVersion=$(VERSION) assembleDebug
+	mkdir -p $$(dirname "$(APK)")
 	cp "$(DEBUG_APK)" "$(APK)"
 	printf 'APK: %s\n' "$(APK)"
 
-install-apk: apk
+apk: $(APK)
+
+install-apk: $(APK)
 	$(ADB) get-state >/dev/null 2>&1 || { printf '%s\n' 'No adb device found. Enable USB debugging and connect the reader.' >&2; exit 1; }
 	$(ADB) install -r $(APK)
+
+launch: install-apk
+	$(ADB) get-state >/dev/null 2>&1 || { printf '%s\n' 'No adb device found.' >&2; exit 1; }
+	$(ADB) shell am start -n $(PKG)/.MainActivity
 
 clean:
 	$(GRADLE) -p android clean
