@@ -1,13 +1,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
     <title>MTG Life Counter</title>
 <style>
 html, body {
     width: 100%;
     height: 100%;
-    margin: 0px;
+    margin: 0;
     overflow: hidden;
     font-family: sans-serif;
     font-size: 16px;
@@ -54,7 +54,7 @@ html, body {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     background-color: white;
-    border: 1px solid grey;
+    /*border: 1px solid grey;*/
 }
 
 .playerName {
@@ -141,26 +141,27 @@ button {
 
 #commanderOverlay {
     position: absolute;
-    left: 5%;
-    top: 5%;
-    width: 90%;
-    height: 90%;
-    padding: 8px;
+    left: 2%;
+    top: 3px;
+    width: 96%;
+    height: 94%;
     background: white;
     border: 2px solid black;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     z-index: 100;
-    overflow: auto;
+    overflow: hidden;
     font-size: 18px;
 }
 
 .damageRow.selfSummary {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: top;
     align-items: center;
     border: 1px solid #555;
+    border-radius: 4px;
+    margin: 0;
 }
 
 .damageRow.selfSummary .lifeTotal {
@@ -169,31 +170,36 @@ button {
 }
 
 .damageRow.selfSummary .selfSummaryMeta {
-    font-size: 13px;
-    color: #555;
+    font-size: 14px;
+    color: black;
     margin-top: 4px;
 }
 
 .commanderOverlayTitle {
+    position: absolute;
     text-align: center;
     font-size: 22px;
-    line-height: 32px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .commanderClose {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 44px;
-    height: 44px;
-    font-size: 26px;
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
+    line-height: 36px;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
 }
 
 .commanderToggle {
     display: block;
     border-color: #777;
     color: black;
-    width: 100%;
+    width: 98%;
     height: 48px;
     margin: 6px auto;
     font-size: 20px;
@@ -248,9 +254,8 @@ button {
 }
 
 .commanderDamageGrid {
-    position: relative;
-    height: 82%;
-    margin-top: 8px;
+    position: absolute;
+    box-sizing: border-box;
 }
 
 .damageRow {
@@ -273,12 +278,19 @@ button {
     position: absolute;
     bottom: 0;
     left: 0;
-    background: white;
     border-top: 1px solid black;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    padding: 5px;
+    padding: 3px;
     z-index: 10;
+    vertical-align: middle;
+}
+
+/* HUD in Options mode */
+.hud.hidden-mode {
+    border-top: none !important;
+    border: none !important;
+    height: 44px; /* Shrunk height to fit button */
 }
 
 .hud button {
@@ -286,21 +298,82 @@ button {
     width: auto;
     padding: 0 8px;
     font-size: 14px;
-    margin: 2px;
+    margin: 3px 1px;
     border-radius: 3px;
     vertical-align: middle;
+    flex-shrink: 0;
 }
 
-.safeButtons { float: left; display: inline; }
-.warningButtons { display: inline; float: right; }
-.warningButtons button { background-color: white; border-color: black; color: black; width: auto; height: 38px; padding: 0 10px; font-size: 14px; }
+/* Center HUD content when editing controls are hidden */
+.hud.centered {
+    text-align: center;
+}
+
+.hud.centered .safeButtons {
+    float: none;
+    display: inline-block;
+}
+
+/* Expand main view when HUD shrinks */
+.hud.hidden-mode ~ #allPlayers {
+    border: none;
+    border-top: none;
+    bottom: 30px;
+}
+
+.safeButtons {
+    display: flex;
+    width: 100%;
+}
+
+/* safeButtons in Options mode */
+.safeButtons.hidden-mode {
+    width: auto;
+    justify-content: flex-start;
+    margin: 0 auto;
+}
+
+#rotateToggleButton {
+    background: black !important;
+    color: white !important;
+    font-weight: bold;
+    border: 2px solid black;
+    border-radius: 4px;
+    padding: 0 12px;
+}
+
+/* Sleek, e-ink friendly handle */
+#rotateToggleButton.bar-mode {
+    width: 80%;
+    height: 16px;
+    margin: 14px auto;
+    border: 1px solid #666;
+    border-radius: 6px;
+    background: transparent !important;
+    cursor: pointer;
+    padding: 0;
+    display: block;
+    font-size: 16px;
+    line-height: 12px;
+    font-weight: bold;
+    color: black !important;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Ensure no focus ring remains after tapping */
+#rotateToggleButton.bar-mode:focus,
+#rotateToggleButton.bar-mode:active {
+    outline: none !important;
+    border-color: #666;
+}
+
 .nextline { display: none; }
 
 </style>
 </head>
 
 <body>
-    <div id="allPlayers" class="playerSlots"></div>
     <div class="hud">
         <div id="safeButtons" class="safeButtons">
             <button onclick="addPlayer()" class="hudBtn">Add Player</button>
@@ -310,17 +383,29 @@ button {
             <button onclick="setStartingLife(40)" class="hudBtn">40</button>
             <button onclick="playCommander()" class="hudBtn">Commander</button>
             <button id="rotateToggleButton" onclick="doneEditing()" class="hudBtn" style="font-weight: bold;">GO!</button>
-        </div>
-        <div class="warningButtons">
-            <button onclick="reset()" class="hudBtn">Reset</button>
+            <button onclick="reset()" class="hudBtn" style="margin-left: auto;">Reset</button>
         </div>
         <!-- Status message area -->
-        <span id="hudMessage" style="color: #ff6666; font-size: 13px; margin-left: 10px; line-height: 38px;"></span>
+        <span id="hudMessage" style="color: #444; font-size: 13px; margin-left: 10px; line-height: 38px;"></span>
     </div>
+    <div id="allPlayers" class="playerSlots"></div>
     <script>
     "use strict";
 
     var numPlayers = 4;
+    var DEBUG_ENABLED = true; // Set to false to disable debug messages in the HUD
+
+    // skull emoji (utf8 cannot be rotated!)
+    // will be used to show a player's death detected by regular or commander dmg
+    var skullSvg = '<svg viewBox="0 0 24 24" width="22" height="22" style="vertical-align:-3px; margin-right:4px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">' +
+               '<!-- Schädelkontur -->' +
+               '<path d="M9 19h6m-3-3v4M5 9c0-3.86 3.14-7 7-7s7 3.14 7 7c0 2.21-.97 4.21-2.5 5.5-.77.67-1.5 1.5-1.5 2.5h-6c0-1-.73-1.83-1.5-2.5C5.97 13.21 5 11.21 5 9z"/>' +
+               '<!-- Augen -->' +
+               '<circle cx="9" cy="9" r="1.25" fill="currentColor"/>' +
+               '<circle cx="15" cy="9" r="1.25" fill="currentColor"/>' +
+               '<!-- Nase -->' +
+               '<path d="M12 12v1"/>' +
+               '</svg>';
 
     function addClickHandler(element, handler) {
         if (element.addEventListener) {
@@ -380,6 +465,7 @@ button {
     function BasePlayer(name) {
         this.name = name;
         this.life = 40;
+        this.poison = 0;
         this.colors = ["W", "U", "B", "R", "G"];
         this.renderElement = null;
         this.flipped = false;
@@ -389,7 +475,7 @@ button {
         this.lifeDisplayElement = null;
         this.renderIndex = 0;
         this.renderPlayers = [];
-        this.renderCommanderMode = false;
+        this.renderCommanderMode = true;
         this.renderActiveDamagePlayer = -1;
         this.commanderSummaryElements = [];
         this.currentDelta = 0;
@@ -405,6 +491,33 @@ button {
             }
         }
         return p;
+    };
+
+    BasePlayer.prototype.toJSON = function() {
+        return {
+            name: this.name,
+            life: this.life,
+            poison: this.poison,
+            colors: this.colors,
+            flipped: this.flipped,
+            rotation: this.rotation,
+            editing: this.editing,
+            commanderDamage: this.commanderDamage
+        };
+    };
+
+    BasePlayer.prototype.isDead = function() {
+        // 1. Leben <= 0
+        if (this.getDisplayedLife(true) <= 0) return true;
+        // 2. Giftmarken >= 10
+        if (this.poison >= 10) return true;
+        // 3. 21+ Commander Damage von einem einzelnen Gegner
+        for (var i = 0; i < this.commanderDamage.length; i++) {
+            if (typeof this.commanderDamage[i] === "number" && this.commanderDamage[i] >= 21) {
+                return true;
+            }
+        }
+        return false;
     };
 
     BasePlayer.prototype.flip = function() {
@@ -448,6 +561,11 @@ button {
             that.currentDelta = 0;
             that._deltaTimer = null;
         }, 2500);
+    };
+
+    BasePlayer.prototype.xcrementPoison = function(amount) {
+        this.poison = (this.poison || 0) + amount;
+        if (this.poison < 0) this.poison = 0;
     };
 
     BasePlayer.prototype.getCommanderDamage = function(opponentIndex) {
@@ -669,6 +787,7 @@ button {
             addClickHandler(flipButton, function() {
                 that.flip();
                 that.refresh();
+                queueSave(manager);
             });
         }
 
@@ -711,6 +830,11 @@ button {
             commanderDiv.id = "commanderOverlay";
             document.body.appendChild(commanderDiv);
 
+            var overlayRotation = typeof this.rotation === "number" ? this.rotation : 0;
+            var overlayW = commanderDiv.clientWidth;
+            var overlayH = commanderDiv.clientHeight;
+            var titleThickness = 44;
+
             var commanderTitle = document.createElement("div");
             commanderTitle.className = "commanderOverlayTitle";
             commanderTitle.innerHTML = "Commander damage";
@@ -724,9 +848,87 @@ button {
                 manager.activeDamagePlayer = -1;
                 manager.refresh();
             });
+
             var damageGrid = document.createElement("div");
             damageGrid.className = "commanderDamageGrid";
             commanderDiv.appendChild(damageGrid);
+
+            var gridX = 0;
+            var gridY = 0;
+            var gridW = overlayW;
+            var gridH = overlayH;
+
+            if (overlayRotation === 90) {
+                commanderTitle.style.width = overlayH + "px";
+                commanderTitle.style.height = titleThickness + "px";
+                commanderTitle.style.lineHeight = titleThickness + "px";
+                commanderTitle.style.left = (overlayW - titleThickness / 2) + "px";
+                commanderTitle.style.top = (overlayH / 2) + "px";
+                commanderTitle.style.marginLeft = "-" + (overlayH / 2) + "px";
+                commanderTitle.style.marginTop = "-" + (titleThickness / 2) + "px";
+
+                closeButton.style.bottom = "3px";
+                closeButton.style.right = "3px";
+
+                gridX = 0;
+                gridY = 0;
+                gridW = overlayW - titleThickness;
+                gridH = overlayH;
+            } else if (overlayRotation === 180) {
+                commanderTitle.style.width = overlayW + "px";
+                commanderTitle.style.height = titleThickness + "px";
+                commanderTitle.style.lineHeight = titleThickness + "px";
+                commanderTitle.style.left = "0px";
+                commanderTitle.style.top = (overlayH - titleThickness) + "px";
+
+                closeButton.style.bottom = "3px";
+                closeButton.style.left = "3px";
+
+                gridX = 0;
+                gridY = 0;
+                gridW = overlayW;
+                gridH = overlayH - titleThickness;
+            } else if (overlayRotation === 270) {
+                commanderTitle.style.width = overlayH + "px";
+                commanderTitle.style.height = titleThickness + "px";
+                commanderTitle.style.lineHeight = titleThickness + "px";
+                commanderTitle.style.left = (titleThickness / 2) + "px";
+                commanderTitle.style.top = (overlayH / 2) + "px";
+                commanderTitle.style.marginLeft = "-" + (overlayH / 2) + "px";
+                commanderTitle.style.marginTop = "-" + (titleThickness / 2) + "px";
+
+                closeButton.style.top = "3px";
+                closeButton.style.left = "3px";
+
+                gridX = titleThickness;
+                gridY = 0;
+                gridW = overlayW - titleThickness;
+                gridH = overlayH;
+            } else {
+                commanderTitle.style.width = overlayW + "px";
+                commanderTitle.style.height = titleThickness + "px";
+                commanderTitle.style.lineHeight = titleThickness + "px";
+                commanderTitle.style.left = "0px";
+                commanderTitle.style.top = "0px";
+
+                closeButton.style.top = "3px";
+                closeButton.style.right = "3px";
+
+                gridX = 0;
+                gridY = titleThickness;
+                gridW = overlayW;
+                gridH = overlayH - titleThickness;
+            }
+
+            commanderTitle.style.webkitTransform = "rotate(" + overlayRotation + "deg)";
+            commanderTitle.style.transform = "rotate(" + overlayRotation + "deg)";
+            closeButton.style.webkitTransform = "rotate(" + overlayRotation + "deg)";
+            closeButton.style.transform = "rotate(" + overlayRotation + "deg)";
+
+            damageGrid.style.left = gridX + "px";
+            damageGrid.style.top = gridY + "px";
+            damageGrid.style.width = gridW + "px";
+            damageGrid.style.height = gridH + "px";
             
             var overlayCols = 2;
             if (players.length === 1) overlayCols = 1;
@@ -738,12 +940,16 @@ button {
                 if (opponentIndex === playerIndex) {
                     damageRow.className += " selfSummary";
                     
+                    var lifeTitle = document.createElement("p");
+                    lifeTitle.innerHTML = "Life Total";
+
                     var lifeSpan = document.createElement("span");
                     lifeSpan.className = "lifeTotal";
                     
                     var metaSpan = document.createElement("span");
                     metaSpan.className = "selfSummaryMeta";
-                    
+
+                    damageRow.appendChild(lifeTitle);
                     damageRow.appendChild(lifeSpan);
                     damageRow.appendChild(metaSpan);
                     
@@ -776,7 +982,7 @@ button {
                             target.refreshLife();
                             target.refreshOverlaySelfSummary();
                             
-                            serializeGameManager(manager);
+                            queueSave(manager);
                         };
 
                         addHoldHandler(downButton, function() { updateDamage(-1); }, 150);
@@ -786,7 +992,6 @@ button {
 
                 damageGrid.appendChild(damageRow);
 
-                var overlayRotation = typeof this.rotation === "number" ? this.rotation : 0;
                 var overlayRow = Math.floor(opponentIndex / overlayCols);
                 var overlayCol = opponentIndex % overlayCols;
                 
@@ -795,9 +1000,6 @@ button {
                 var itemsInThisRow = isLastRow ? (players.length - (overlayRow * overlayCols)) : overlayCols;
 
                 damageRow.style.position = "absolute";
-
-                var gridW = damageGrid.clientWidth;
-                var gridH = damageGrid.clientHeight;
 
                 // Base standard column width on the primary column count so single items don't blow up in size when rotated
                 var standardCellW = gridW / overlayCols;
@@ -808,40 +1010,56 @@ button {
                 //var cellX = (itemsInThisRow === 1) ? Math.round((gridW - cellW) / 2) : Math.round(overlayCol * cellW);
                 var cellY = overlayRow * cellH;
 
+                var inset = (opponentIndex === playerIndex) ? 8 : 0;
+                var rowW = cellW - (inset * 2);
+                var rowH = cellH - (inset * 2);
+
                 if (overlayRotation === 90 || overlayRotation === 270) {
-                    damageRow.style.width = cellH + "px";
-                    damageRow.style.height = cellW + "px";
+                    damageRow.style.width = rowH + "px";
+                    damageRow.style.height = rowW + "px";
                     damageRow.style.left = (cellX + cellW / 2) + "px";
                     damageRow.style.top = (cellY + cellH / 2) + "px";
-                    damageRow.style.marginLeft = "-" + (cellH / 2) + "px";
-                    damageRow.style.marginTop = "-" + (cellW / 2) + "px";
-                    damageRow.style.webkitTransform = "rotate(" + overlayRotation + "deg) translateY(-4px)";
-                    damageRow.style.transform = "rotate(" + overlayRotation + "deg) translateY(-4px)";
+                    damageRow.style.marginLeft = "-" + (rowH / 2) + "px";
+                    damageRow.style.marginTop = "-" + (rowW / 2) + "px";
                 } else {
-                    damageRow.style.width = cellW + "px";
-                    damageRow.style.height = cellH + "px";
-                    damageRow.style.left = cellX + "px";
-                    damageRow.style.top = cellY + "px";
+                    damageRow.style.width = rowW + "px";
+                    damageRow.style.height = rowH + "px";
+                    damageRow.style.left = (cellX + inset) + "px";
+                    damageRow.style.top = (cellY + inset) + "px";
+                    damageRow.style.margin = "0px";
                 }
 
                 damageRow.style.webkitTransform = "rotate(" + overlayRotation + "deg)";
                 damageRow.style.transform = "rotate(" + overlayRotation + "deg)";
             }
         }
+        this.refreshLife();
     };
 
     BasePlayer.prototype.refreshLife = function() {
+        var dead = this.isDead();
+        
+        // 1. Anzeige auf dem Hauptfeld aktualisieren
         if (this.lifeDisplayElement !== null) {
-            this.lifeDisplayElement.innerHTML = this.getDisplayedLife(this.renderCommanderMode);
+            var lifeText = this.getDisplayedLife(this.renderCommanderMode);
+            // Zeige Totenkopf vor/über den Lebenspunkten, wenn tot
+            this.lifeDisplayElement.innerHTML = dead ? (skullSvg + "<br>" + lifeText) : lifeText;
         } else {
             this.refresh();
         }
+
+        // 2. Anzeige im Commander-Overlay (falls geöffnet)
+        this.refreshOverlaySelfSummary();
     };
 
     BasePlayer.prototype.refreshOverlaySelfSummary = function() {
         if (this.overlayLifeElement && this.overlayMetaElement) {
-            this.overlayLifeElement.innerHTML = this.getDisplayedLife(true);
-            this.overlayMetaElement.innerHTML = "Base: " + this.life + " | Dmg: -" + this.getTotalCommanderDamage();
+            var dead = this.isDead();
+            var lifeText = this.getDisplayedLife(true);
+            
+            // Im Overlay-Self-Summary: Schädel direkt neben den Netto-Lebenspunkten
+            this.overlayLifeElement.innerHTML = dead ? (skullSvg + " " + lifeText) : lifeText;
+            this.overlayMetaElement.innerHTML = "Base: " + this.life + " | Cmdr Dmg: -" + this.getTotalCommanderDamage();
         }
     };
 
@@ -850,7 +1068,7 @@ button {
         this.count = 0;
         this.renderElement = null;
         this.editing = true;
-        this.commanderMode = false;
+        this.commanderMode = true;
         this.activeDamagePlayer = -1;
         this.startingLife = 40;
         this.rotationLayoutCount = -1;
@@ -868,7 +1086,37 @@ button {
         if (typeof pm.startingLife !== "number") {
             pm.startingLife = 40;
         }
+        // Load persisted HUD / editing state
+        if (typeof json_obj["editing"] === "boolean") {
+            pm.setEditing(json_obj["editing"]);
+        }
+
+        pm.rotationLayoutCount = pm.players.length;
+
         return pm;
+    };
+
+    PlayerManager.prototype.toJSON = function() {
+        var serializedPlayers = [];
+        for (var i = 0; i < this.players.length; i++) {
+            var p = this.players[i];
+            serializedPlayers.push({
+                name: p.name,
+                life: p.life,
+                colors: p.colors,
+                flipped: p.flipped,
+                rotation: p.rotation,
+                editing: p.editing,
+                commanderDamage: p.commanderDamage
+            });
+        }
+        return {
+            players: serializedPlayers,
+            editing: this.editing,
+            commanderMode: this.commanderMode,
+            startingLife: this.startingLife,
+            rotationLayoutCount: this.rotationLayoutCount
+        };
     };
 
     PlayerManager.prototype.loadExistingPlayer = function(p) {
@@ -883,6 +1131,8 @@ button {
         p.editing = this.editing;
         this.players.push(p);
         this.count++;
+        // re-calculate rotation-layout
+        this.rotationLayoutCount = -1;
     };
     
     PlayerManager.prototype.removePlayer = function() {
@@ -890,7 +1140,7 @@ button {
             this.players.pop();
             this.count--;
             this.render(this.renderElement);
-            serializeGameManager(this);
+            queueSave(this);
         } else {
             alert("You must keep at least one player.");
         }
@@ -1006,57 +1256,135 @@ PlayerManager.prototype.render = function(containingElement) {
     var isStorageAvailable = false;
     try {
         if (typeof localStorage !== "undefined") {
+            localStorage.setItem("__storageTest__", "1");
+            localStorage.removeItem("__storageTest__");
             isStorageAvailable = true;
         }
     } catch (e) {
         isStorageAvailable = false;
     }
 
+    function showHudMessage(msg, durationMs) {
+        var msgElem = document.getElementById("hudMessage");
+        if (!msgElem || DEBUG_ENABLED === false) return;
+        msgElem.innerHTML = msg;
+        if (durationMs) {
+            setTimeout(function() { msgElem.innerHTML = ""; }, durationMs);
+        }
+    }
+
     var manager = new PlayerManager();
+    var objStr = null;
+
+    // Try reading from localStorage first, then fallback to Cookie
     if (isStorageAvailable) {
-        var objStr = localStorage.getItem("savedManager");
-        if (objStr !== null) {
-            try {
-                var item = JSON.parse(objStr);
-                manager = PlayerManager.unJSON(item);
-            } catch (e) {
-                manager = new PlayerManager();
-            }
+        objStr = localStorage.getItem("savedManager");
+    }
+    if (!objStr) {
+        objStr = getCookie("savedManager");
+    }
+
+    if (objStr !== null) {
+        try {
+            var item = JSON.parse(objStr);
+            manager = PlayerManager.unJSON(item);
+        } catch (e) {
+            manager = new PlayerManager();
+            showHudMessage("Save data corrupt, starting fresh", 4000);
         }
     }
 
     var container = document.getElementById("allPlayers");
-    manager.render(container);
 
-    if (manager.players.length < 4) {
-        for (var i = manager.players.length; i < 4; i++) {
+    // prevent misrendering layout after reload/recovery from storage
+    setSetupButtonsVisible(manager.editing);
+
+    // only on zero players fill it to 4 default
+    if (manager.players.length === 0) {
+        for (var i = 0; i < 4; i++) {
             manager.addPlayer();
         }
-        manager.refresh();
     }
-    function serializeGameManager(target_manager) {
-        if (isStorageAvailable) {
-            try {
-                var serialized = JSON.stringify(target_manager);
-                localStorage.setItem("savedManager", serialized);
-            } catch (err) {}
+
+    manager.render(container);
+
+    // Helper functions for cookie persistence
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
         }
+        document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/";
+    }
+
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+        }
+        return null;
+    }
+
+    function immediateSave(target_manager) {
+        try {
+            var serialized = JSON.stringify(target_manager);
+            // Save to localStorage
+            if (isStorageAvailable) {
+                localStorage.setItem("savedManager", serialized);
+            }
+            // Mirror to Cookie (valid for 60 days)
+            setCookie("savedManager", serialized, 60);
+        } catch (err) {
+            showHudMessage("Save failed: " + err.message, 5000);
+        }
+    }
+
+    var saveTimeout = null;
+
+    function queueSave(target_manager) {
+        if (saveTimeout !== null) {
+            clearTimeout(saveTimeout);
+        }
+        // Only serialize and save after short user idle time
+        saveTimeout = setTimeout(function() {
+            immediateSave(target_manager);
+            saveTimeout = null;
+        }, 1000);
     }
 
     function setSetupButtonsVisible(visible) {
+        var hud = document.querySelector(".hud");
         var safeButtons = document.getElementById("safeButtons");
+        var rotateBtn = document.getElementById("rotateToggleButton");
+
         for (var buttonIndex = 0; buttonIndex < safeButtons.children.length; buttonIndex++) {
             var button = safeButtons.children[buttonIndex];
             if (button.id !== "rotateToggleButton") {
                 button.style.display = visible ? "inline-block" : "none";
             }
         }
+
+        // Toggle HUD layout mode
+        if (visible) {
+            hud.className = "hud";
+            safeButtons.className = "safeButtons";
+            rotateBtn.innerHTML = "GO!";
+            rotateBtn.classList.remove("bar-mode");
+        } else {
+            hud.className = "hud hidden-mode";
+            safeButtons.className = "safeButtons hidden-mode";
+            // magic utf-8 dots
+            rotateBtn.innerHTML = "• • •";
+            rotateBtn.classList.add("bar-mode");
+        }
     }
 
-    if (!manager.editing) {
-        setSetupButtonsVisible(false);
-        document.getElementById("rotateToggleButton").innerHTML = "Options";
-    }
+    setSetupButtonsVisible(manager.editing);
 
     var addPlayer = function() {
         var msgElem = document.getElementById("hudMessage");
@@ -1070,7 +1398,7 @@ PlayerManager.prototype.render = function(containingElement) {
         msgElem.innerHTML = "";
         manager.addPlayer();
         manager.refresh();
-        serializeGameManager(manager);
+        queueSave(manager);
     };
 
     window.addEventListener("resize", function() {
@@ -1086,37 +1414,51 @@ PlayerManager.prototype.render = function(containingElement) {
     function playCommander() {
         manager.playCommander();
         manager.refresh();
-        serializeGameManager(manager);
+        queueSave(manager);
     }
 
     function setStartingLife(life) {
         manager.setStartingLife(life);
         manager.refresh();
-        serializeGameManager(manager);
+        queueSave(manager);
     }
 
     function reset() {
         if (!confirm("Reset the game?")) {
             return;
         }
+        if (isStorageAvailable) {
+            localStorage.removeItem("savedManager");
+        }
         manager.reset();
         setSetupButtonsVisible(true);
-        document.getElementById("rotateToggleButton").innerHTML = "Hide";
+        //document.getElementById("rotateToggleButton").innerHTML = "Hide";
         manager.refresh();
-        serializeGameManager(manager);
+        immediateSave(manager);
     }
 
     function doneEditing() {
         manager.setEditing(!manager.editing);
         setSetupButtonsVisible(manager.editing);
-        document.getElementById("rotateToggleButton").innerHTML = manager.editing ? "Hide" : "Options";
+        //document.getElementById("rotateToggleButton").innerHTML = manager.editing ? "Hide" : "Options";
         manager.refresh();
-        serializeGameManager(manager);
+        queueSave(manager);
     }
 
     setInterval(function() {
-        serializeGameManager(manager);
+        immediateSave(manager);
     }, 5000);
+
+    window.addEventListener("pagehide", function() {
+        immediateSave(manager);
+    });
+
+    document.addEventListener("visibilitychange", function() {
+        if (document.visibilityState === "hidden") {
+            immediateSave(manager);
+        }
+    });
+
     </script>
 </body>
 </html>
