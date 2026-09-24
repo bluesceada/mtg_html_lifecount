@@ -1,7 +1,7 @@
 SHELL := /bin/sh
 
 PORT ?= 8000
-VERSION ?= 1.0.1
+VERSION ?= 1.0.2
 GRADLE_VERSION ?= 8.5
 GRADLE ?= ./.tools/gradle-$(GRADLE_VERSION)/bin/gradle
 ADB ?= adb
