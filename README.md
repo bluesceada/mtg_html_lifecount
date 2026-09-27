@@ -94,15 +94,11 @@ The app targets API 19 for the Tolino while compiling against Platform 33. On Ub
 sudo apt install openjdk-21-jdk google-android-platform-33-installer google-android-build-tools-34-installer adb
 ```
 
-The project uses the SDK at `/usr/lib/android-sdk` through the ignored file `android/local.properties`. Create it from the example:
+The project uses the SDK at `/usr/lib/android-sdk` through an ignored `android/local.properties` file. It will be auto-copied from the `android/local.properties.example` if it does not exist.
+Adjust this file to your needs, if the SDK is at another location.
 
-```sh
-cp android/local.properties.example android/local.properties
-```
-
-If the SDK is installed elsewhere, edit `android/local.properties`.
-
-The repository uses Python to create a virtual environment and download Gradle locally into ignored `.tools/`; it does not require `/opt` or a system Gradle installation:
+The repository uses Python to create a virtual environment and download Gradle locally into ignored `.tools/`; it does not require `/opt` or a system Gradle installation.
+Run the whole apk and environment generation process with:
 
 ```sh
 make apk
@@ -113,13 +109,7 @@ The APK is created at:
 ```text
 android/app/build/outputs/apk/debug/MTG-Life-Counter-v1.0.1.apk
 ```
-(or any newer version number)
-
-The used version is controlled by the Makefile and can be changed when building:
-
-```sh
-make apk VERSION=1.0.1
-```
+(or any newer version number, which is also set by the Makefile)
 
 ## Make Targets
 
@@ -131,6 +121,7 @@ make server       Start the LAN server
 make apk          Build the debug APK
 make install-apk  Build and install through adb
 make clean        Clean Android build output
+make launch       Launch the apk through adb commands
 ```
 
 `make install-apk` installs the locally built APK. It does not install the GitHub release APK; install that directly with `adb install -r <release-apk>` as shown above.
@@ -141,5 +132,5 @@ Useful overrides:
 make server PORT=8081
 make apk GRADLE=./.tools/gradle-8.5/bin/gradle
 make install-apk ADB=/path/to/adb
-make apk VERSION=1.0.1
+make apk VERSION=1.2.3
 ```

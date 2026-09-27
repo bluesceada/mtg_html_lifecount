@@ -29,7 +29,13 @@ env: setup
 server:
 	./serve.sh $(PORT)
 
-$(APK): setup
+android/local.properties:
+	@if [ -f android/local.properties.example ]; then \
+		cp android/local.properties.example $@; \
+		printf '%s\n' '\033[1;33mWARNING:\033[0m android/local.properties was missing. Copied from android/local.properties.example.' >&2; \
+	fi
+
+$(APK): setup android/local.properties
 	[ -x "$(GRADLE)" ] || { printf '%s\n' 'Gradle setup failed or Android SDK is missing.' >&2; exit 1; }
 	$(GRADLE) -p android -PappVersion=$(VERSION) assembleDebug
 	mkdir -p $$(dirname "$(APK)")

@@ -4,8 +4,11 @@ set -e
 GRADLE_VERSION="8.5"
 GRADLE_DIR=".tools/gradle-${GRADLE_VERSION}"
 
-python3 -m venv .venv
-.venv/bin/python -m pip install nodeenv
+if [ ! -d ".venv" ]; then
+	python3 -m venv .venv
+	.venv/bin/python -m pip install nodeenv
+fi
+
 if [ ! -x ".nodeenv/bin/node" ]; then
 	.venv/bin/nodeenv --node=22.14.0 .nodeenv
 fi
@@ -27,8 +30,8 @@ with zipfile.ZipFile(archive) as package:
 	package.extractall(".tools")
 os.remove(archive)
 PY
-fi
 chmod +x "${GRADLE_DIR}/bin/gradle"
+fi
 
 printf 'Environment ready: %s\n' "$PWD/.nodeenv/bin/node"
 printf 'Gradle ready: %s\n' "$PWD/${GRADLE_DIR}/bin/gradle"
