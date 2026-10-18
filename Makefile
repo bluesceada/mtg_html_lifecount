@@ -8,6 +8,9 @@ ADB ?= adb
 APK := android/app/build/outputs/apk/debug/MTG-Life-Counter-v$(VERSION).apk
 DEBUG_APK := android/app/build/outputs/apk/debug/app-debug.apk
 PKG ?= com.example.mtglifecounter
+JAVA_HOME = /usr/lib/jvm/java-21-openjdk-amd64
+# need it for gradle to run properly
+export JAVA_HOME
 
 .PHONY: help setup env server apk install-apk launch clean
 
@@ -36,7 +39,7 @@ android/local.properties:
 	fi
 
 $(APK): setup android/local.properties
-	[ -x "$(GRADLE)" ] || { printf '%s\n' 'Gradle setup failed or Android SDK is missing.' >&2; exit 1; }
+	@[ -x "$(GRADLE)" ] || { printf '%s\n' 'Gradle setup failed or Android SDK is missing.' >&2; exit 1; }
 	$(GRADLE) -p android -PappVersion=$(VERSION) assembleDebug
 	mkdir -p $$(dirname "$(APK)")
 	cp "$(DEBUG_APK)" "$(APK)"

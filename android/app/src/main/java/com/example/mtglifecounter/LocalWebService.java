@@ -65,12 +65,34 @@ public class LocalWebService extends Service {
                 client.close();
                 return;
             }
+            
+            // Extract the requested path (e.g., "/weather.html" or "/")
+            String[] parts = requestLine.split(" ");
+            String path = parts.length > 1 ? parts[1] : "/";
+            if (path.equals("/")) {
+                path = "/index.html";
+            }
+            // Strip leading slash to match asset filename (e.g., "weather.html")
+            String assetName = path.startsWith("/") ? path.substring(1) : path;
+
             String headerLine;
             while ((headerLine = reader.readLine()) != null && headerLine.length() > 0) {
                 // Consume request headers.
             }
 
-            InputStream page = getAssets().open("index.html");
+            InputStream page;
+            try {
+                page = getAssets().open(assetName);
+            } catch (IOException e) {
+                // File not found -> return 404
+                OutputStream output = client.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+                writer.write("HTTP/1.0 404 Not Found\r\nConnection: close\r\n\r\n");
+                writer.flush();
+                client.close();
+                return;
+            }
+
             byte[] body = readAll(page);
             OutputStream output = client.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));

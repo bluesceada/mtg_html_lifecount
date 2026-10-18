@@ -22,9 +22,8 @@ android {
 }
 
 tasks.register("copyWebApp", Copy) {
-    from rootProject.file("../index.html")
+    from rootProject.files("../index.html", "../weather.html")
     into "$projectDir/src/main/assets"
-    rename { "index.html" }
 }
 
 tasks.named("preBuild") {
