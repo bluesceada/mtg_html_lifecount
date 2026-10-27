@@ -760,6 +760,7 @@
     moreDaysButton.addEventListener("click", function() {
       moreDaysOverlay.hidden = false;
       moreDaysOverlay.scrollTop = 0;
+      document.getElementById("more-days-title").textContent = selectedLocation.name + " | 15-DAY FORECAST";
       updateSettingsToggle();
       moreDaysStatus.textContent = "Loading...";
       moreDaysStatus.hidden = false;
