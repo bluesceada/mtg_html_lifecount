@@ -27,18 +27,18 @@
     .updated { font-size: 1rem; }
     .header-actions { display: flex; align-items: center; white-space: nowrap; margin-left: 16px; }
     .header-actions button { margin-left: 16px; }
-    .header-actions #time-stamp { margin-left: 0; }
+    .header-actions #time-stamp { margin-left: 4px; margin-right: 2px; }
     .header-actions #weather-retry { margin-left: 8px; }
     button, input, select { font: inherit; color: inherit; }
     button { border: 2px solid #000000; background: #ffffff; padding: 8px 12px; font-weight: bold; }
     .sync-reload { border: 0; background: transparent; padding: 0; font: inherit; font-weight: normal; text-align: left; cursor: default; }
-    .sync-reload-icon { font-size: 0.8rem; margin-right: 3px; }
-    #settings-toggle, #more-days-button, .recent-remove, .recent-confirm { border-radius: 4px; }
-    .settings-toggle-anchor { display: inline-block; width: 40px; height: 40px; margin-left: 16px; flex: 0 0 40px; vertical-align: middle; }
+    .sync-reload-icon { font-size: 1rem; margin-right: 3px; }
+    #settings-toggle, #more-days-button, #weather-retry, .recent-remove, .recent-confirm { border-radius: 4px; }
+    .settings-toggle-anchor { display: inline-block; width: 40px; height: 40px; margin-left: 4px; flex: 0 0 40px; vertical-align: middle; }
     #settings-toggle { width: 40px; height: 40px; padding: 0; font-size: 1.6rem; line-height: 1; margin: 0; }
     #settings-toggle[data-overlay-open="true"] { position: fixed; z-index: 40; }
     #more-days-button { height: 40px; padding: 0 12px; }
-    #weather-retry { width: 36px; height: 36px; padding: 0; border-radius: 4px; font-size: 1.25rem; line-height: 1; }
+    #weather-retry { width: 40px; height: 40px; padding: 0; margin-left: 12px; border-radius: 4px; font-size: 1.25rem; line-height: 1; }
     #weather-retry[hidden] { display: none; }
     .recent-remove { border: 0; }
     .recent-confirm { border: 1px solid #000000; }
@@ -52,7 +52,7 @@
     .settings[hidden] { display: none; }
     .settings-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
     .settings .recent-list { display: flex; flex-wrap: wrap; margin-bottom: 8px; }
-    .settings .recent-item { width: 50%; padding-right: 8px; }
+    .settings .recent-item { width: 49%; margin-right: 1%; }
     .settings .recent-place { min-width: 0; margin-right: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .settings .recent-empty { width: 100%; }
     .settings-row { display: flex; }
@@ -139,7 +139,7 @@
     .forecast-day-divider { border-left: 1px solid #000000; }
     .forecast-weather-icon { font-size: 1.4rem; vertical-align: middle; margin-right: 4px; }
     .forecast-actions { margin-top: -8px; margin-bottom: 0; }
-    .more-days-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 30; overflow-y: auto; background: #ffffff; padding: 40px 20px 24px; }
+    .more-days-overlay { position: fixed; top: 8px; right: 8px; bottom: 8px; left: 8px; z-index: 30; width: auto; max-width: 800px; overflow-y: auto; border: 3px solid #000000; background: #ffffff; padding: 30px 20px 16px; margin: 0 auto; }
     .more-days-overlay[hidden] { display: none; }
     .more-days-panel { max-width: 800px; margin: 0 auto; }
     .more-days-header { display: flex; align-items: center; margin-bottom: 12px; }
@@ -178,17 +178,18 @@
     <div class="city" id="location-name">Weather</div>
     <div class="header-actions" id="header-actions">
       <button type="button" class="updated sync-reload" id="sync-reload-button" aria-label="Weather sync time. Activate to refresh weather.">
-        <span class="sync-reload-icon" aria-hidden="true">↻</span><span id="time-stamp">--:--</span>
+        <!--<span class="sync-reload-icon" aria-hidden="true">↻</span>-->
+        <span id="time-stamp">--:--</span>
       </button>
+      <button type="button" id="weather-retry" aria-label="Retry weather update" title="Retry weather update" hidden>↻</button>
       <div id="settings-toggle-anchor" class="settings-toggle-anchor">
         <button type="button" id="settings-toggle" aria-label="Open places" title="Open places" aria-expanded="false" aria-controls="location-settings">+</button>
       </div>
-      <button type="button" id="weather-retry" aria-label="Retry weather update" title="Retry weather update" hidden>↻</button>
     </div>
   </div>
 
   <section class="settings" id="location-settings" hidden>
-    <div class="forecast-title">RECENT LOCATIONS</div>
+    <div class="forecast-title" style="padding-right: 48px;">RECENT LOCATIONS</div>
     <ul class="recent-list" id="recent-locations"></ul>
     <div class="settings-title">Add a location</div>
     <form id="location-search-form">
@@ -247,7 +248,7 @@
 
   <section class="more-days-overlay" id="more-days-overlay" role="dialog" aria-modal="true" aria-labelledby="more-days-title" hidden>
     <div class="more-days-panel">
-      <div class="forecast-title" id="more-days-title">15-DAY FORECAST</div>
+      <div class="forecast-title" id="more-days-title" style="padding-right: 48px;">15-DAY FORECAST</div>
       <div class="more-days-status" id="more-days-status" role="status" aria-live="polite"></div>
       <div class="extended-forecast-grid" id="extended-forecast-grid"></div>
       <button type="button" class="more-days-retry" id="more-days-retry" hidden>Retry</button>
@@ -333,8 +334,10 @@
       var anchor = document.getElementById("settings-toggle-anchor");
       if (overlayOpen && anchor) {
         var rect = anchor.getBoundingClientRect();
-        settingsToggle.style.top = rect.top + "px";
-        settingsToggle.style.left = rect.left + "px";
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+        settingsToggle.style.top = Math.round(rect.top + scrollTop) + "px";
+        settingsToggle.style.left = Math.round(rect.left + scrollLeft) + "px";
       } else {
         settingsToggle.style.top = "";
         settingsToggle.style.left = "";
@@ -735,7 +738,10 @@
       }
     });
     weatherRetryButton.addEventListener("click", function() {
-      if (!weatherRetryButton.disabled) loadWeather(true);
+      if (!weatherRetryButton.disabled) {
+        weatherRetryButton.disabled = true;
+        loadWeather(true);
+      }
     });
     timeStampButton.addEventListener("click", function() {
       if (!weatherRetryButton.disabled) loadWeather(true);
@@ -752,8 +758,8 @@
     }
 
     moreDaysButton.addEventListener("click", function() {
-      window.scrollTo(0, 0);
       moreDaysOverlay.hidden = false;
+      moreDaysOverlay.scrollTop = 0;
       updateSettingsToggle();
       moreDaysStatus.textContent = "Loading...";
       moreDaysStatus.hidden = false;
@@ -987,7 +993,7 @@
       }
       timeStampLabel.innerText = lastSync;
       timeStampButton.setAttribute("aria-label", "Last sync " + lastSync + ". Activate to refresh weather.");
-      weatherRetryButton.hidden = new Date().getTime() - savedAt <= 60 * 60 * 1000;
+      weatherRetryButton.hidden = new Date().getTime() - savedAt <= 30 * 60 * 1000;
 
       // Current
       document.getElementById("current-temp").innerText = Math.round(data.current.temperature_2m) + "°";
@@ -1132,10 +1138,10 @@
       requestJSON(url, function(data) {
         if (selectedLocation.latitude !== requestedLocation.latitude || selectedLocation.longitude !== requestedLocation.longitude) return;
         var savedAt = new Date().getTime();
-        renderWeather(data, savedAt);
-        saveWeatherCache(data, savedAt, requestedLocation);
         weatherRetryButton.hidden = true;
         weatherRetryButton.disabled = false;
+        renderWeather(data, savedAt);
+        saveWeatherCache(data, savedAt, requestedLocation);
       }, function() {
         if (selectedLocation.latitude !== requestedLocation.latitude || selectedLocation.longitude !== requestedLocation.longitude) return;
         weatherRetryButton.hidden = false;
